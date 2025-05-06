@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Trang Chủ{% endblock %}
+
+{% block content %}
+<!-- Content: Bao bọc toàn bộ nội dung chính của trang chủ -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}">
+<div class="content">
+    <!-- Phim Mới Section: Hiển thị danh sách phim mới trong carousel -->
+    <section class="film-section">
+        <h2>PHIM MỚI</h2>
+        <div class="film-carousel">
+            <!-- Nút prev-btn: Cuộn carousel sang trái -->
+            <button class="carousel-btn prev-btn">❮</button>
+            <!-- Carousel: Chứa các phim mới, hỗ trợ cuộn ngang -->
+            <div class="carousel">
+                {% for film in new_films %}
+                <!-- Film-item: Đại diện cho một phim trong carousel -->
+                <a href="{{ url_for('film_details', film_id=film.id) }}" class="film-item">
+                    <!-- Film-poster-wrapper: Bao bọc ảnh poster và các yếu tố liên quan -->
+                    <div class="film-poster-wrapper">
+                        {% if film.poster_path|default(film.poster, true) and film.poster_path|default(film.poster, true)|length > 0 %}
+                        <!-- Film-poster: Hiển thị ảnh poster của phim -->
+                        <img src="{{ film.poster_path|default(film.poster, true) }}" alt="{{ film.title }}" class="film-poster">
+                        {% else %}
+                        <!-- Film-poster-placeholder: Hiển thị khung thay thế nếu không có poster -->
+                        <div class="film-poster-placeholder"></div>
+                        {% endif %}
+                        <!-- Play-button: Nút phát hiện khi hover -->
+                        <div class="play-button"></div>
+                        <!-- Film-meta: Hiển thị thông tin như chất lượng phim -->
+                        <div class="film-meta">
+                            <span class="quality">Vietsub - HD</span>
+                        </div>
+                    </div>
+                    <!-- Film-title-small: Tiêu đề phim trong carousel -->
+                    <div class="film-title-small">{{ film.title }}</div>
+                </a>
+                {% endfor %}
+            </div>
+            <!-- Nút next-btn: Cuộn carousel sang phải -->
+            <button class="carousel-btn next-btn">❯</button>
+        </div>
+    </section>
+
+    <!-- Main-content-wrapper: Bao bọc kho phim và sidebar top phim -->
+    <div class="main-content-wrapper">
+        <!-- Film-collection: Hiển thị danh sách phim trong kho phim -->
+        <section class="film-collection">
+            <h2>KHO PHIM</h2>
+            <!-- Film-grid: Lưới hiển thị các phim trong kho phim -->
+            <div class="film-grid">
+                {% for film in all_films[:16] %} <!-- Giới hạn tối đa 16 phim -->
+                <!-- Film-card: Đại diện cho một phim trong kho phim -->
+                <a href="{{ url_for('film_details', film_id=film.id) }}" class="film-card">
+                    <div class="film-poster-wrapper">
+                        {% if film.poster_path|default(film.poster, true) and film.poster_path|default(film.poster, true)|length > 0 %}
+                        <img src="{{ film.poster_path|default(film.poster, true) }}" alt="{{ film.title }}" class="film-poster">
+                        {% else %}
+                        <div class="film-poster-placeholder"></div>
+                        {% endif %}
+                        <div class="play-button"></div>
+                        <div class="film-meta">
+                            <span class="quality">Vietsub - HD</span>
+                        </div>
+                    </div>
+                    <!-- Film-title: Tiêu đề phim trong kho phim -->
+                    <div class="film-title">{{ film.title }}</div>
+                </a>
+                {% endfor %}
+            </div>
+            <!-- View-all-btn: Nút dẫn đến trang hiển thị tất cả phim -->
+            <a href="{{ url_for('collection') }}" class="view-all-btn">Xem tất cả</a>
+        </section>
+
+        <!-- Top-films-sidebar: Hiển thị danh sách top phim -->
+        <div class="top-films-sidebar">
+            <h2>TOP PHIM</h2>
+            <!-- Top-films-list: Danh sách các phim top -->
+            <div class="top-films-list">
+                {% for film in top_films %}
+                <!-- Top-film-item: Đại diện cho một phim trong top phim -->
+                <a href="{{ url_for('film_details', film_id=film.id) }}" class="top-film-item">
+                    <!-- Top-film-thumbnail: Hiển thị ảnh thumbnail của phim -->
+                    <div class="top-film-thumbnail" {% if film.poster_path|default(film.poster, true) and film.poster_path|default(film.poster, true)|length > 0 %}style="background-image: url('{{ film.poster_path|default(film.poster, true) }}'); background-size: cover; background-position: center;"{% else %}style="background-color: #222; border: 2px solid #444;"{% endif %}></div>
+                    <!-- Top-film-info: Chứa thông tin phim -->
+                    <div class="top-film-info">
+                        <!-- Top-film-title: Tiêu đề phim trong top phim -->
+                        <div class="top-film-title">{{ film.title }}</div>
+                        <!-- Top-film-meta: Hiển thị chất lượng và lượt xem -->
+                        <div class="top-film-meta">
+                            <span class="quality">Vietsub - HD</span>
+                            <span class="views">{{ film.views if film.views is defined else '1K+' }} lượt xem</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Liên kết đến tệp JS riêng -->
+<script src="{{ url_for('static', filename='js/homepage.js') }}"></script>
+{% endblock %}

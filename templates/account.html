@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Tài khoản người dùng{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+
+<div class="content">
+    <h2>TÀI KHOẢN NGƯỜI DÙNG</h2>
+    <div class="account-container">
+        <div class="account-info">
+            <h3>Thông tin tài khoản</h3>
+            <div class="account-layout">
+                <div class="account-details">
+                    <p><strong>User ID:</strong> <span id="user-id">{{ user.id }}</span></p>
+                    <p><strong>Tên đăng nhập:</strong> <span id="username">{{ user.username }}</span></p>
+                    {% if user.email %}
+                    <p><strong>Email:</strong> <span id="email">{{ user.email }}</span></p>
+                    {% endif %}
+                    {% if user.fullName %}
+                    <p><strong>Họ và tên:</strong> <span id="fullname">{{ user.fullName }}</span></p>
+                    {% endif %}
+                    <p><strong>Ngày tham gia:</strong> <span id="join-date">
+                        {% if user.registerDate %}
+                            {{ user.registerDate.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            Chưa cập nhật
+                        {% endif %}
+                    </span></p>
+                </div>
+                <div class="account-buttons-right">
+                    <a href="/films/favorites" class="action-btn">Phim yêu thích</a>
+                    <a href="/admin/films" class="action-btn">Quản lý phim</a>
+                    <a href="/admin/accounts" class="action-btn">Quản lý tài khoản</a>
+                </div>
+            </div>
+            <div class="account-actions">
+                <button class="action-btn" id="change-password-btn">Đổi mật khẩu</button>
+                <button class="action-btn logout-btn" id="logout-btn">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="change-password-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <form id="change-password-form">
+            <h2>ĐỔI MẬT KHẨU</h2>           
+            <input type="password" id="current-password" name="currentPassword" class="modal-input" placeholder="Mật khẩu hiện tại" required> 
+            <input type="password" id="new-password" name="newPassword" class="modal-input" placeholder="Mật khẩu mới" required>
+            <input type="password" id="confirm-password" name="confirmPassword" class="modal-input" placeholder="Nhập lại mật khẩu mới" required>
+            <button type="submit" class="modal-btn">Đổi mật khẩu</button>
+            <div id="change-password-error" class="error-message" style="display: none; margin-top: 10px;"></div>
+        </form>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/account.js') }}"></script>
+{% endblock %}

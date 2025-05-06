@@ -1,0 +1,110 @@
+.content {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+.content h2 {
+    color: #d08000;
+}
+
+.account-container {
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #d08000;
+    margin-top: 20px;
+}
+
+.account-info {
+    margin-bottom: 30px;
+}
+
+.account-layout {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.account-details {
+    flex: 1;
+}
+
+.account-details p {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #ccc;
+}
+
+.account-details p strong {
+    color: #fff;
+}
+
+.account-buttons-right {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.account-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(to right, #903625, #A1812D);
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    opacity: 0.8;
+}
+
+.logout-btn {
+    background: #F44336;
+}
+
+.error-message {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-left: 3px solid #F44336;
+    padding: 15px;
+    border-radius: 3px;
+    text-align: left;
+    color: #ff6b6b;
+}
+
+@media (max-width: 768px) {
+    .account-layout {
+        flex-direction: column;
+    }
+
+    .account-buttons-right {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .account-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .action-btn {
+        width: 100%;
+        max-width: 200px;
+    }
+}

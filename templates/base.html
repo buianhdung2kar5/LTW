@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHIM NEU - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <style>
+        /* Fix for film grid layout */
+        .film-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-gap: 15px;
+            width: 100%;
+        }
+        
+        .film-card {
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Ensure content fills the grid cell */
+        .placeholder-image {
+            width: 100%;
+            height: 0;
+            padding-top: 150%;
+            background-color: #333;
+            position: relative;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/"><img src="/static/images/logo.png" alt="PHIM NEU Logo" class="logo-img"></a>
+            </div>
+            <div class="nav-container">
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <button class="menu-close">×</button>
+                    <li><a href="/collection">KHO PHIM</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle">THỂ LOẠI</a>
+                        <div class="dropdown-menu">
+                            {% for genre in genres %}
+                            <a href="{{ url_for('genre', genre_slug=genre.slug) }}" class="dropdown-item">{{ genre.name }}</a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                    <li><a href="#" onclick="showMessageBox(); return false;">TRAILER</a></li>
+                </ul>
+            </div>
+            <div class="search-container">
+                <form action="{{ url_for('search') }}" method="GET">
+                    <input type="text" name="query" placeholder="Tìm kiếm phim..." class="search-input">
+                    <button type="submit" class="search-button"><img src='/static/images/search-button.png'></button>
+                </form>
+            </div>
+            <div class="auth-buttons" id="auth-buttons" {% if session['username'] %}style="display: none;"{% endif %}>
+                <button class="login-btn">Đăng nhập</button>
+                <button class="register-btn">Đăng ký</button>
+            </div>
+            <div class="user-info" id="user-info" {% if session['username'] %}style="display: flex;"{% else %}style="display: none;"{% endif %}>
+                <span class="user-label">USER: <span id="username-display">{{ session['username'] if session['username'] else "Tên User" }}</span></span>
+                <img src="/static/images/avatar_user.png" alt="User Avatar" class="user-avatar">
+                <div class="dropdown">
+                    <button class="dropdown-toggle">▼</button>
+                    <div class="dropdown-menu">
+                        <a href="/account" class="dropdown-item">Tài khoản</a>
+                        <a href="/films/favorites" class="dropdown-item">Yêu thích</a>
+                        <a href="#" class="dropdown-item" id="logout-btn">Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Modal Đăng nhập -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <form id="login-form" method="POST" action="/auth/login">
+                <h2>Tên đăng nhập</h2>
+                <input type="text" name="username" class="modal-input" placeholder="Tên đăng nhập" required>
+                <h2>Mật khẩu</h2>
+                <input type="password" name="password" class="modal-input" placeholder="Mật khẩu" required>
+                <button type="submit" class="modal-btn">Đăng nhập</button>
+                <p class="forgot-password">Bạn chưa có tài khoản? <a href="#" id="show-register">Đăng ký ngay</a></p>
+                <div id="login-error" class="error-message" style="display: none; color: red; margin-top: 10px;"></div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal Đăng ký -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <form id="register-form" method="POST" action="/auth/register">
+                <h2>Tên đăng nhập</h2>
+                <input type="text" name="username" class="modal-input" placeholder="Tên đăng nhập" required>
+                <h2>Mật khẩu</h2>
+                <input type="password" name="password" class="modal-input" placeholder="Mật khẩu" required>
+                <h2>Nhập lại mật khẩu</h2>
+                <input type="password" name="confirm-password" class="modal-input" placeholder="Nhập lại mật khẩu" required>
+                <button type="submit" class="modal-btn">Đăng ký</button>
+                <p class="forgot-password">Bạn đã có tài khoản? <a href="#" id="show-login">Đăng nhập ngay</a></p>
+                <div id="register-error" class="error-message" style="display: none; color: red; margin-top: 10px;"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Message Box for Coming Soon Features -->
+    <div id="message-box-overlay" class="message-box-overlay">
+        <div class="message-box">
+            <button class="message-close-btn" onclick="hideMessageBox()">×</button>
+            <h2>THÔNG BÁO</h2>
+            <p>Chức năng đang được cập nhật. Vui lòng quay lại sau!</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    {% block content %}
+    {% endblock %}
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <div class="logo">
+                    <a href="/"><img src="/static/images/logo.png"></a>
+                </div>
+                <p>Website xem phim miễn phí<br>Chất lượng cao, không quảng cáo<br>Hỗ trợ đa nền tảng<br>HD 4K dành cho bạn!</p>
+            </div>
+            <div class="footer-links">
+                <h3><a href="{{ url_for('collection') }}">KHO PHIM</a></h3>
+            </div>
+            <div class="footer-genres">
+                <h3>THỂ LOẠI</h3>
+                <ul class="genre-list">
+                    {% for genre in genres %}
+                    <li><a href="{{ url_for('genre', genre_slug=genre.slug) }}">{{ genre.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="footer-help">
+                <h3>TRỢ GIÚP</h3>
+                <ul>
+                    <li><a href="/help">Hỗ trợ</a></li>
+                    <li><a href="/contact">Liên hệ</a></li>
+                    <li><a href="/terms">Điều khoản sử dụng</a></li>
+                    <li><a href="/privacy">Chính sách quyền riêng tư</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Utilities -->
+    <script src="/static/js/notification-util.js"></script>
+    
+    <!-- JavaScript -->
+    <script src="/static/js/base.js"></script>
+
+    <!-- JavaScript cho các trang con (nếu cần) -->
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>

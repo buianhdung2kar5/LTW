@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Error{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="error-container">
+        <h1>Error</h1>
+        <div class="error-message">
+            <p>{{ message }}</p>
+        </div>
+        <div class="error-actions">
+            <a href="{{ url_for('home') }}" class="back-btn">Back to Home</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .error-container {
+        max-width: 600px;
+        margin: 80px auto;
+        padding: 30px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid #d08000;
+    }
+    
+    .error-container h1 {
+        color: #d08000;
+        margin-bottom: 20px;
+    }
+    
+    .error-message {
+        background-color: rgba(255, 0, 0, 0.1);
+        border-left: 3px solid #F44336;
+        padding: 15px;
+        border-radius: 3px;
+        text-align: left;
+        margin-bottom: 20px;
+    }
+    
+    .error-actions {
+        margin-top: 20px;
+    }
+    
+    .back-btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #d08000;
+        color: white;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    
+    .back-btn:hover {
+        background: #b36b00;
+    }
+</style>
+{% endblock %}

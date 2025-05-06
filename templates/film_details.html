@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if film %}{{ film.title }}{% else %}Chi tiết phim{% endif %}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/film_details.css') }}">
+
+<div class="content">
+    <section class="featured-film">
+        <div class="featured-container">
+            <div class="featured-thumbnail">
+                <div class="placeholder-image"{% if film and film.poster_path %} style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}></div>
+            </div>
+            <div class="featured-details">
+                <h1 class="film-title">{% if film %}{{ film.title }}{% else %}TÊN PHIM{% endif %}</h1>
+                <div class="film-info">
+                    <p><span class="label">Thể loại:</span> {% if film and film.genres %}{{ film.genres | join(', ') }}{% else %}Không có{% endif %}</p>
+                    <p><span class="label">Năm phát hành:</span> {% if film and film.release_year %}{{ film.release_year }}{% else %}N/A{% endif %}</p>
+                    <p><span class="label">Thời lượng:</span> {% if film and film.length %}{{ film.length }} phút{% else %}N/A{% endif %}</p>
+                    <p><span class="label">Điểm đánh giá:</span> {% if film and film.rating %}{{ film.rating }}/10{% else %}N/A{% endif %}</p>
+                </div>
+                <div class="featured-buttons">
+                    <a href="{% if film %}{{ url_for('watch_film', film_id=film.id) }}{% else %}#{% endif %}"><button class="watch-now-btn">XEM NGAY ➤</button></a>
+                    {% if user_id %}
+                    <button class="add-to-list-btn" id="favorite-btn" data-film-id="{{ film.id }}">
+                        <i class="fas fa-heart" id="heart-icon"></i> 
+                        <span id="favorite-text">THÊM VÀO YÊU THÍCH</span>
+                    </button>
+                    {% else %}
+                    <a href="{{ url_for('login') }}"><button class="add-to-list-btn">
+                        <i class="fas fa-heart"></i> đăng nhập đi
+                    </button></a>
+                    {% endif %}
+                </div>
+                <hr class="separator">
+                <div class="film-description">
+                    <p class="description">Nội dung phim</p>
+                    <p class="description-text">{% if film and film.description %}{{ film.description }}{% else %}Chưa có mô tả chi tiết{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-content-wrapper">
+        <section class="main-film-list">
+            <h2>CÓ THỂ BẠN MUỐN XEM</h2>
+            <div class="film-grid">
+                {% if related_films %}
+                    {% for film in related_films %}
+                    <a href="{{ url_for('film_details', film_id=film.id) }}" class="film-card">
+                        <div class="placeholder-image" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}>
+                            <div class="play-button"></div>
+                            <div class="film-meta">
+                                <span class="quality">Vietsub - HD</span>
+                            </div>
+                        </div>
+                        <div class="film-info">
+                            <div class="film-title-list">{{ film.title }}</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-results">Không có phim liên quan</p>
+                {% endif %}
+            </div>
+        </section>
+        
+        <div class="top-films-sidebar">
+            <h2>TOP PHIM</h2>
+            <div class="top-films-list">
+                {% for film in top_films %}
+                <a href="{{ url_for('film_details', film_id=film.id) }}" class="top-film-item">
+                    <div class="top-film-thumbnail" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}></div>
+                    <div class="top-film-info">
+                        <div class="top-film-title">{{ film.title }}</div>
+                        <div class="top-film-meta">
+                            <span class="quality">Vietsub - HD</span>
+                            <span class="views">{{ film.views|default('1K+') }} lượt xem</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="notification-container" class="notification-container"></div>
+
+<script src="{{ url_for('static', filename='js/film_details.js') }}"></script>
+{% endblock %}
