@@ -24,81 +24,53 @@ def register_debug_routes(app):
             client = MongoClient(uri)
             db = client[dbname]
             
-            # Test user details
-            username = "testuser"
-            password = "password123"
+            # Create and check test users
+            results = {}
             
-            # Check if user already exists
-            existing_user = db.users.find_one({'username': username})
-            if existing_user:
-                return jsonify({
-                    'message': 'Test user already exists',
+            def create_test_user_if_not_exists(username, password, role='user', hash_password=True):
+                existing_user = db.users.find_one({'username': username})
+                if existing_user:
+                    return False, {
+                        'username': username,
+                        'password': password,
+                        'user_id': str(existing_user['_id'])
+                    }
+                
+                user_data = {
                     'username': username,
-                    'password': password,
-                    'user_id': str(existing_user['_id'])
-                })
-            
-            # Create test user
-            hashed_password = generate_password_hash(password)
-            new_user = {
-                'username': username,
-                'password': hashed_password,
-                'role': 'user',
-                'status': 'active',
-                'avatar': '/static/images/avatar_user.png',
-                'registerDate': datetime.now()
-            }
-            
-            result = db.users.insert_one(new_user)
-            
-            # Also create a test admin user
-            admin_username = "admin"
-            admin_password = "admin123"
-            existing_admin = db.users.find_one({'username': admin_username})
-            
-            if not existing_admin:
-                hashed_admin_password = generate_password_hash(admin_password)
-                admin_user = {
-                    'username': admin_username,
-                    'password': hashed_admin_password,
-                    'role': 'admin',
+                    'password': generate_password_hash(password) if hash_password else password,
+                    'role': role,
                     'status': 'active',
                     'avatar': '/static/images/avatar_user.png',
                     'registerDate': datetime.now()
                 }
-                db.users.insert_one(admin_user)
-            
-            # Also create a user with plain text password for testing
-            plain_username = "plainuser"
-            plain_password = "pass123"
-            existing_plain = db.users.find_one({'username': plain_username})
-            
-            if not existing_plain:
-                plain_user = {
-                    'username': plain_username,
-                    'password': plain_password,  # Deliberately not hashed for testing
-                    'role': 'user',
-                    'status': 'active',
-                    'avatar': '/static/images/avatar_user.png',
-                    'registerDate': datetime.now()
-                }
-                db.users.insert_one(plain_user)
-            
-            return jsonify({
-                'message': 'Test users created successfully',
-                'test_user': {
+                result = db.users.insert_one(user_data)
+                return True, {
                     'username': username,
                     'password': password,
                     'user_id': str(result.inserted_id)
-                },
-                'admin_user': {
-                    'username': admin_username,
-                    'password': admin_password
-                },
-                'plain_text_user': {
-                    'username': plain_username,
-                    'password': plain_password
                 }
+            
+            # Create regular test user
+            is_new, user_data = create_test_user_if_not_exists("testuser", "password123")
+            if not is_new:
+                return jsonify({
+                    'message': 'Test user already exists',
+                    **user_data
+                })
+            results['test_user'] = user_data
+            
+            # Create admin test user
+            _, admin_data = create_test_user_if_not_exists("admin", "admin123", "admin")
+            results['admin_user'] = admin_data
+            
+            # Create plain text password user
+            _, plain_data = create_test_user_if_not_exists("plainuser", "pass123", "user", False)
+            results['plain_text_user'] = plain_data
+            
+            return jsonify({
+                'message': 'Test users created successfully',
+                **results
             })
             
         except Exception as e:

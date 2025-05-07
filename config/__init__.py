@@ -1,4 +1,4 @@
-from .default import DefaultConfig
+from .default import DefaultConfig  # Import lớp cấu hình mặc định từ module default
 
-# Export the DefaultConfig class
+# Xuất lớp DefaultConfig để sử dụng trong ứng dụng
 __all__ = ['DefaultConfig']

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Kho Phim{% endblock %}
+{% block title %}Phim Yêu Thích{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/favorites.css') }}">
@@ -39,13 +39,13 @@
             {% if total_pages > 1 %}
             <div class="pagination">
                 {% if current_page > 1 %}
-                <a href="{{ url_for('favorite', page=current_page-1) }}" class="pagination-btn">Trước</a>
+                <a href="{{ url_for('favorite.view_favorites', page=current_page-1) }}" class="pagination-btn">Trước</a>
                 {% endif %}
                 
                 <span class="page-info">Trang {{ current_page }}/{{ total_pages }}</span>
                 
                 {% if current_page < total_pages %}
-                <a href="{{ url_for('favorites', page=current_page+1) }}" class="pagination-btn">Sau</a>
+                <a href="{{ url_for('favorite.view_favorites', page=current_page+1) }}" class="pagination-btn">Sau</a>
                 {% endif %}
             </div>
             {% endif %}

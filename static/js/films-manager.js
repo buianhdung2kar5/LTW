@@ -48,33 +48,34 @@ function showNotification(message, type = 'success') {
     AppNotification.show(message, type);
 }
 
-// Improved function to handle genre filter dropdown
+// Hàm cải tiến để xử lý dropdown bộ lọc thể loại
 function initGenreFilterDropdown() {
+    // Lấy tham chiếu đến các phần tử DOM
     const genreFilterInput = document.querySelector('.genre-filter-input');
     const genreFilterCheckboxes = document.querySelector('.genre-filter-checkboxes');
     
-    // Toggle dropdown when clicking on the input
+    // Hiển thị/ẩn dropdown khi click vào input - Mở/đóng danh sách thể loại
     genreFilterInput.addEventListener('click', (e) => {
-        e.stopPropagation();
-        genreFilterCheckboxes.classList.toggle('active');
+        e.stopPropagation(); // Ngăn sự kiện click lan ra ngoài
+        genreFilterCheckboxes.classList.toggle('active'); // Thêm/xóa class active
     });
     
-    // Prevent dropdown from closing when clicking inside it
+    // Ngăn dropdown đóng lại khi click vào bên trong nó - Cho phép chọn nhiều thể loại mà không bị đóng dropdown
     genreFilterCheckboxes.addEventListener('click', (e) => {
-        e.stopPropagation();
+        e.stopPropagation(); // Ngăn sự kiện click lan ra ngoài
     });
     
-    // Close dropdown when clicking outside
+    // Đóng dropdown khi click bên ngoài - Cải thiện trải nghiệm người dùng
     document.addEventListener('click', () => {
-        genreFilterCheckboxes.classList.remove('active');
+        genreFilterCheckboxes.classList.remove('active'); // Ẩn dropdown khi click ra ngoài
     });
     
-    // Initialize checkbox change handlers
+    // Khởi tạo các trình xử lý sự kiện thay đổi checkbox - Cập nhật hiển thị ngay khi chọn/bỏ chọn thể loại
     const checkboxes = document.querySelectorAll('input[name="filterCategories"]');
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', (e) => {
-            e.stopPropagation();
-            updateSelectedGenresDisplay();
+            e.stopPropagation(); // Ngăn sự kiện lan ra khỏi checkbox
+            updateSelectedGenresDisplay(); // Cập nhật hiển thị thể loại đã chọn
         });
     });
 }

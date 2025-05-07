@@ -145,7 +145,7 @@ def register_auth_routes(app):
                     'password': generate_password_hash(password),
                     'role': 'user',
                     'status': 'active',
-                    'avatar': '/static/images/avatar_user.png',  # Default avatar
+                    'avatar': '../static/images/avatar_user.png',  # Default avatar
                     'registerDate': datetime.now()
                 }
                 
@@ -177,7 +177,7 @@ def register_auth_routes(app):
                     
         return render_template('register.html')
         
-    @app.route('/auth/logout')
+    @app.route('/auth/logout', methods=['GET', 'POST'])
     def logout():
         """Logout route"""
         session.clear()

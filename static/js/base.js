@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const menuClose = document.querySelector('.menu-close');
     const navLinks = document.querySelector('.nav-links');
 
-    // Mobile menu toggle
+    // Chuyển đổi menu trên thiết bị di động
     menuToggle?.addEventListener('click', () => {
         navLinks.classList.add('active');
     });
@@ -85,6 +85,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 loginModal.style.display = 'none';
                 updateUIAfterLogin(data.username);
                 showToast("success", data.message || "Đăng nhập thành công!");
+                
+                // Gọi convertLoginToFavoriteBtn nếu đang ở trang chi tiết phim
+                if (typeof window.convertLoginToFavoriteBtn === 'function') {
+                    window.convertLoginToFavoriteBtn();
+                }
+                
+                // Thêm class logged-in vào body
+                document.body.classList.add('logged-in');
             } else {
                 showError(loginError, data.message || "Đăng nhập thất bại!");
             }
@@ -124,17 +132,59 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // Xử lý đăng xuất
-    logoutBtn?.addEventListener('click', async (e) => {
-        e.preventDefault();
-        try {
-            await fetch('/auth/logout');
-            authButtons.style.display = 'flex';
-            userInfo.style.display = 'none';
-            showToast("success", "Đăng xuất thành công!");
-        } catch (error) {
-            console.error('Logout error:', error);
-        }
-    });
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                // Hiển thị chỉ báo tải nếu có
+                if (typeof AppNotification !== 'undefined') {
+                    AppNotification.showLoading('Đang đăng xuất...');
+                }
+                
+                // Gọi endpoint đăng xuất
+                const response = await fetch('/auth/logout', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                // Ẩn chỉ báo tải nếu có
+                if (typeof AppNotification !== 'undefined') {
+                    AppNotification.hideLoading();
+                }
+                
+                // Cập nhật UI - ẩn thông tin người dùng, hiển thị nút xác thực
+                if (authButtons) authButtons.style.display = 'flex';
+                if (userInfo) userInfo.style.display = 'none';
+                
+                // Nếu đang ở trang chi tiết phim, chuyển nút yêu thích thành nút đăng nhập
+                if (typeof window.convertFavoriteToLoginBtn === 'function') {
+                    window.convertFavoriteToLoginBtn();
+                }
+                
+                // Hiển thị thông báo thành công
+                if (typeof showToast === 'function') {
+                    showToast('success', 'Đăng xuất thành công!');
+                }
+                
+                // Chuyển hướng nếu cần dựa trên trang hiện tại
+                if (window.location.pathname.includes('/account') || 
+                    window.location.pathname.includes('/favorites')) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                // Ẩn chỉ báo tải nếu có
+                if (typeof AppNotification !== 'undefined') {
+                    AppNotification.hideLoading();
+                }
+                console.error('Logout error:', error);
+                if (typeof showToast === 'function') {
+                    showToast('error', 'Đăng xuất thất bại! Vui lòng thử lại.');
+                }
+            }
+        });
+    }
 });
 
 // Hàm kiểm tra trạng thái đăng nhập
@@ -172,33 +222,20 @@ function showError(element, message) {
 
 // Hàm hiển thị thông báo thành công
 function showToast(type, message) {
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerText = message;
-    
-    // Add toast to body
-    document.body.appendChild(toast);
-    
-    // Show toast
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 100);
-    
-    // Hide and remove toast after 3 seconds
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-            document.body.removeChild(toast);
-        }, 300);
-    }, 3000);
+    if (typeof AppNotification !== 'undefined') {
+        AppNotification.show(message, type);
+    } else {
+        // Fallback simple alert or console.log if AppNotification is not available
+        alert(message);
+    }
 }
 
-// Message box functions
+// Hàm hiển thị hộp thông báo
 function showMessageBox() {
     document.getElementById('message-box-overlay').style.display = 'flex';
 }
 
+// Hàm ẩn hộp thông báo
 function hideMessageBox() {
     document.getElementById('message-box-overlay').style.display = 'none';
 }

@@ -3,19 +3,15 @@ from bson.objectid import ObjectId
 from functools import wraps
 import os
 from datetime import datetime
+from werkzeug.security import check_password_hash
 
-# Try to import models
-try:
-    from models.models import Favorite, Film
-except ImportError:
-    # Fallback if models aren't available
-    Favorite = None
-    Film = None
+# Import Favorite model từ module favorite
+from models.favorite import Favorite
 
-# Create a blueprint
+# Tạo Blueprint
 user_bp = Blueprint('user', __name__, url_prefix='/user')
 
-# MongoDB connection function (reusing from admin routes)
+# MongoDB connection function
 def get_db():
     """Get MongoDB database connection"""
     try:
@@ -48,6 +44,20 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Helper function to find user by ID
+def find_user_by_id(db, user_id):
+    try:
+        # Try to find by ObjectId first
+        user = db.users.find_one({'_id': ObjectId(user_id)})
+        if user:
+            return user
+            
+        # Try numeric ID if ObjectId fails
+        user_id_int = int(user_id)
+        return db.users.find_one({'id': user_id_int})
+    except:
+        return None
+
 # User profile page
 @user_bp.route('/account')
 def profile():
@@ -61,38 +71,12 @@ def profile():
     try:
         user_id = session.get('user_id')
         
-        # Use Favorite model if available, otherwise direct DB access
-        if Favorite:
-            favorites_data = Favorite.get_user_favorites(str(user_id))
-            film_ids = [fav.get('film_id') for fav in favorites_data]
-            
-            for film_id in film_ids:
-                film = Film.get_by_id(film_id)
-                if film:
-                    favorites.append(film)
-        else:
-            # Direct database access
-            user_favorites = list(db.favorites.find({"user_id": user_id}))
-            film_ids = [fav.get('film_id') for fav in user_favorites]
-            
-            for film_id in film_ids:
-                try:
-                    # Try different formats of ID
-                    film = None
-                    try:
-                        film = db.films.find_one({"id": int(film_id)})
-                    except:
-                        try:
-                            film = db.films.find_one({"_id": ObjectId(film_id)})
-                        except:
-                            film = db.films.find_one({"id": film_id})
-                    
-                    if film:
-                        if '_id' in film:
-                            film['_id'] = str(film['_id'])
-                        favorites.append(film)
-                except Exception as e:
-                    print(f"Error getting film {film_id}: {str(e)}")
+        # Sử dụng Favorite model đã import
+        favorites_data = Favorite.get_user_favorites(user_id)
+        films = Favorite.get_user_favorite_films(user_id)
+        
+        if films:
+            favorites = films
     except Exception as e:
         print(f"Error getting favorites: {str(e)}")
     finally:
@@ -112,17 +96,7 @@ def profile_data():
     try:
         # Try to find user by ID
         user_id = session.get('user_id')
-        
-        # Try to find by ObjectId first
-        try:
-            user = db.users.find_one({'_id': ObjectId(user_id)})
-        except:
-            # If not a valid ObjectId, try as a numeric ID
-            try:
-                user_id_int = int(user_id)
-                user = db.users.find_one({'id': user_id_int})
-            except:
-                return jsonify({'error': 'User not found'}), 404
+        user = find_user_by_id(db, user_id)
         
         if not user:
             return jsonify({'error': 'User not found'}), 404
@@ -153,7 +127,6 @@ def update_profile():
     try:
         # Get request data
         data = request.json
-        email = data.get('email', '').strip()
         full_name = data.get('fullName', '').strip()
         
         # Get user from session
@@ -161,8 +134,6 @@ def update_profile():
         
         # Try to find and update user
         update_data = {'updatedAt': datetime.utcnow()}
-        if email:
-            update_data['email'] = email
         if full_name:
             update_data['fullName'] = full_name
         
@@ -212,44 +183,42 @@ def change_password():
         
         # Get user from session
         user_id = session.get('user_id')
-        
-        # Find user
-        try:
-            user = db.users.find_one({'_id': ObjectId(user_id)})
-        except:
-            try:
-                user_id_int = int(user_id)
-                user = db.users.find_one({'id': user_id_int})
-            except:
-                return jsonify({'message': 'Người dùng không tồn tại'}), 404
+        user = find_user_by_id(db, user_id)
         
         if not user:
             return jsonify({'message': 'Người dùng không tồn tại'}), 404
         
         # Verify current password with improved handling
         stored_password = user.get('password', '')
-        print(f"Debug - Password check: User ID {user_id}, Input length {len(current_password)}, Stored length {len(stored_password)}")
         
-        # Compare passwords with normalization
-        if stored_password.strip() != current_password:
+        # Check password - try both direct comparison (for plain text) and hash verification
+        password_match = False
+        
+        # Try direct comparison first (for plain text passwords in development)
+        if current_password == stored_password:
+            password_match = True
+        # Then try hashed password verification
+        elif check_password_hash(stored_password, current_password):
+            password_match = True
+            
+        if not password_match:
             return jsonify({'message': 'Mật khẩu hiện tại không đúng'}), 400
         
         # Update password
         update_result = None
         try:
-            update_result = db.users.update_one(
-                {'_id': ObjectId(user_id)},
-                {'$set': {'password': new_password, 'updatedAt': datetime.utcnow()}}
-            )
-        except:
-            try:
-                user_id_int = int(user_id)
+            if isinstance(user['_id'], ObjectId):
                 update_result = db.users.update_one(
-                    {'id': user_id_int},
+                    {'_id': user['_id']},
                     {'$set': {'password': new_password, 'updatedAt': datetime.utcnow()}}
                 )
-            except:
-                return jsonify({'message': 'Lỗi khi cập nhật mật khẩu'}), 500
+            else:
+                update_result = db.users.update_one(
+                    {'id': user.get('id')},
+                    {'$set': {'password': new_password, 'updatedAt': datetime.utcnow()}}
+                )
+        except Exception as e:
+            return jsonify({'message': f'Lỗi khi cập nhật mật khẩu: {str(e)}'}), 500
         
         if update_result and update_result.matched_count > 0:
             return jsonify({'message': 'Mật khẩu đã được cập nhật thành công'})
@@ -266,176 +235,25 @@ def change_password():
 @user_bp.route('/favorites')
 @login_required
 def get_favorites():
-    client, db = get_db()
-    if db is None:
-        return jsonify([])
-    
-    try:
-        # Get user from session
-        user_id = session.get('user_id')
-        
-        # Use Favorite model if available, otherwise use direct database access
-        if Favorite:
-            # Use the model
-            user_id_str = str(user_id)
-            favorites_data = Favorite.get_user_favorites(user_id_str)
-            
-            film_ids = [fav.get('film_id') for fav in favorites_data]
-            
-            # Get film details for each favorite
-            films = []
-            for film_id in film_ids:
-                film = Film.get_by_id(film_id)
-                if film:
-                    films.append(film)
-            
-            return jsonify(films)
-        else:
-            # Direct database access (legacy code)
-            # Find favorites for this user
-            favorites = list(db.favorites.find({"user_id": user_id}))
-            
-            if not favorites:
-                return jsonify([])
-            
-            # Get film IDs from favorites
-            film_ids = [fav.get('film_id') for fav in favorites]
-            
-            # Fetch films by those IDs
-            films = []
-            for film_id in film_ids:
-                try:
-                    # Try numerical ID first
-                    try:
-                        film_id_int = int(film_id)
-                        film = db.films.find_one({"id": film_id_int})
-                    except:
-                        # Then try ObjectId
-                        try:
-                            film = db.films.find_one({"_id": ObjectId(film_id)})
-                        except:
-                            continue
-                    
-                    if film:
-                        # Convert ObjectId to string
-                        if '_id' in film:
-                            film['_id'] = str(film['_id'])
-                        films.append(film)
-                except Exception as e:
-                    print(f"Error getting film {film_id}: {str(e)}")
-                    continue
-            
-            return jsonify(films)
-    except Exception as e:
-        print(f"Error getting favorites: {str(e)}")
-        return jsonify([])
-    finally:
-        if client:
-            client.close()
+    user_id = session.get('user_id')
+    films = Favorite.get_user_favorite_films(user_id)
+    return jsonify(films)
 
 # Check if a film is in favorites
 @user_bp.route('/favorites/check/<film_id>')
 @login_required
 def check_favorite(film_id):
-    client, db = get_db()
-    if db is None:
-        return jsonify({"isFavorite": False})
-    
-    try:
-        user_id = session.get('user_id')
-        
-        # Use either model or direct DB access
-        if Favorite:
-            user_id_str = str(user_id)
-            is_favorite = Favorite.is_favorite(user_id_str, film_id)
-            return jsonify({"isFavorite": is_favorite})
-        else:
-            # Convert ObjectId if needed
-            try:
-                user_id_obj = ObjectId(user_id)
-            except:
-                user_id_obj = user_id
-                
-            # Try to find a favorite with this user and film
-            favorite = db.favorites.find_one({
-                "user_id": user_id_obj,
-                "film_id": film_id
-            })
-            
-            return jsonify({"isFavorite": favorite is not None})
-    except Exception as e:
-        print(f"Error checking favorite: {str(e)}")
-        return jsonify({"isFavorite": False})
-    finally:
-        if client:
-            client.close()
+    user_id = session.get('user_id')
+    is_favorite = Favorite.is_favorite(user_id, film_id)
+    return jsonify({"isFavorite": is_favorite})
 
 # Toggle favorite film
 @user_bp.route('/favorites/toggle/<film_id>', methods=['POST'])
 @login_required
 def toggle_favorite(film_id):
-    client, db = get_db()
-    if db is None:
-        return jsonify({'error': 'Database connection failed'}), 500
-    
-    try:
-        # Get user from session
-        user_id = session.get('user_id')
-        
-        # Check if film exists
-        film = None
-        try:
-            # Try numeric ID first
-            try:
-                film_id_int = int(film_id)
-                film = db.films.find_one({'id': film_id_int})
-                if film:
-                    film_id = film_id_int  # Use numeric ID if found
-            except:
-                # Then try ObjectId
-                try:
-                    film = db.films.find_one({'_id': ObjectId(film_id)})
-                    if film:
-                        film_id = str(film['_id'])  # Use string ID if found
-                except:
-                    pass
-        except Exception as e:
-            print(f"Error checking film {film_id}: {str(e)}")
-        
-        if not film:
-            return jsonify({'message': 'Phim không tồn tại'}), 404
-            
-        # Check if this film is already in favorites
-        try:
-            user_id_obj = ObjectId(user_id)
-        except:
-            user_id_obj = user_id
-            
-        favorite = db.favorites.find_one({
-            "user_id": user_id_obj,
-            "film_id": film_id
-        })
-        
-        # If it exists, remove it
-        if favorite:
-            db.favorites.delete_one({"_id": favorite["_id"]})
-            action = 'removed'
-        else:
-            # If not, add it
-            db.favorites.insert_one({
-                "user_id": user_id_obj,
-                "film_id": film_id,
-                "added_at": datetime.now()
-            })
-            action = 'added'
-        
-        return jsonify({'message': f'Phim đã được {action}', 'action': action})
-            
-    except Exception as e:
-        return jsonify({'message': str(e)}), 500
-    finally:
-        if client:
-            client.close()
+    user_id = session.get('user_id')
+    result, status_code = Favorite.toggle_favorite(user_id, film_id)
+    return jsonify(result), status_code
 
 @user_bp.route('/profile/data')
 @login_required
@@ -450,18 +268,7 @@ def get_profile_data():
     
     try:
         user_id = session.get('user_id')
-        
-        # Find user by ID
-        try:
-            # Try as ObjectId first
-            user = db.users.find_one({'_id': ObjectId(user_id)})
-        except:
-            try:
-                # Try as numeric ID
-                user_id_int = int(user_id)
-                user = db.users.find_one({'id': user_id_int})
-            except:
-                user = None
+        user = find_user_by_id(db, user_id)
         
         if not user:
             return jsonify({
@@ -484,7 +291,6 @@ def get_profile_data():
         # Return user data
         return jsonify({
             'username': user.get('username', 'User'),
-            'email': user.get('email', ''),
             'fullName': user.get('fullName', ''),
             'registerDate': register_date.isoformat() if isinstance(register_date, datetime) else str(register_date) if register_date else None
         })

@@ -7,30 +7,30 @@ from datetime import datetime
 import threading
 import ssl
 
-# Connect directly to MongoDB Atlas film-users database
+# Kết nối trực tiếp đến MongoDB Atlas film-users database
 try:
-    # Use only MongoDB Atlas with simplified connection
+    # Chỉ sử dụng MongoDB Atlas với kết nối đơn giản hóa
     uri = os.environ.get('MONGO_URI', "mongodb+srv://kiwi:trang%402005@film-users.10h2w59.mongodb.net/?retryWrites=true&w=majority")
-    dbname = "film-users"  # Explicitly use film-users database
+    dbname = "film-users"  # Sử dụng rõ ràng database film-users
     
-    # Create MongoDB client with improved connection settings and explicit SSL context
+    # Tạo MongoDB client với cài đặt kết nối được cải thiện và SSL context rõ ràng
     mongo_client = MongoClient(
         uri,
-        serverSelectionTimeoutMS=5000,
-        connectTimeoutMS=5000,
-        socketTimeoutMS=10000,
-        maxPoolSize=50,
-        retryWrites=True,
-        ssl=True,
-        tlsAllowInvalidCertificates=True  # Updated from ssl_cert_reqs=ssl.CERT_NONE
+        serverSelectionTimeoutMS=5000,  # Thời gian chờ tối đa khi chọn server (5 giây)
+        connectTimeoutMS=5000,          # Thời gian chờ tối đa khi kết nối (5 giây)
+        socketTimeoutMS=10000,          # Thời gian chờ tối đa cho socket (10 giây)
+        maxPoolSize=50,                 # Kích thước tối đa của pool kết nối
+        retryWrites=True,               # Tự động thử lại các thao tác ghi nếu thất bại
+        ssl=True,                       # Kích hoạt SSL cho kết nối an toàn
+        tlsAllowInvalidCertificates=True  # Cho phép chứng chỉ không hợp lệ (từ ssl_cert_reqs=ssl.CERT_NONE)
     )
     
-    # Test connection immediately
+    # Kiểm tra kết nối ngay lập tức
     mongo_client.admin.command('ping')
-    print("[SUCCESS] MongoDB Atlas connection successful!")
+    print("[THÀNH CÔNG] Kết nối MongoDB Atlas thành công!")
 except Exception as e:
-    print(f"[ERROR] MongoDB Atlas connection error: {str(e)}")
-    # Create dummy collections to prevent errors
+    print(f"[LỖI] Lỗi kết nối MongoDB Atlas: {str(e)}")
+    # Tạo các collection giả để ngăn lỗi
     class DummyCollection:
         def find_one(self, *args, **kwargs): 
             return None
@@ -682,15 +682,33 @@ def init_database(app):
         return False
 
 # API and Web app creation functions
+def create_flask_app(app_type='web'):
+    """Create Flask application with appropriate configuration
+    
+    Args:
+        app_type (str): Type of app to create ('api' or 'web')
+    
+    Returns:
+        Flask: Configured Flask application
+    """
+    app = Flask(__name__)
+    app.config['SECRET_KEY'] = 'your-secret-key'
+    
+    # Additional type-specific configuration could be added here
+    if app_type == 'api':
+        # API-specific configuration
+        pass
+    elif app_type == 'web':
+        # Web-specific configuration
+        pass
+        
+    return app
+
 def create_api_app():
-    api_app = Flask(__name__)
-    api_app.config['SECRET_KEY'] = 'your-secret-key'
-    return api_app
+    return create_flask_app('api')
 
 def create_web_app():
-    web_app = Flask(__name__)
-    web_app.config['SECRET_KEY'] = 'your-secret-key'
-    return web_app
+    return create_flask_app('web')
 
 def check_port(port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -710,7 +728,6 @@ if __name__ == '__main__':
     web_app = create_web_app()
     init_database(api_app)
     print("Starting API on http://127.0.0.1:5000")
-    print("Starting Web on http://127.0.0.1:5001")
     api_thread = threading.Thread(target=lambda: api_app.run(debug=True, port=5000, use_reloader=False))
     web_thread = threading.Thread(target=lambda: web_app.run(debug=True, port=5001, use_reloader=False))
     api_thread.start()

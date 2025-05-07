@@ -1,110 +1,184 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Lấy tham chiếu đến các phần tử DOM cần thiết cho trình phát video
     const videoPlayer = document.getElementById('video-player');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const rewindBtn = document.getElementById('rewind-btn'); // Nút tua lùi
+    const forwardBtn = document.getElementById('forward-btn'); // Nút tua tiến
+    const progressBar = document.getElementById('progress-bar'); // Thanh tiến trình
+    const progress = document.getElementById('progress'); // Phần đã phát
+    const currentTimeEl = document.getElementById('current-time'); // Hiển thị thời gian hiện tại
+    const durationEl = document.getElementById('duration'); // Hiển thị tổng thời lượng
+    const muteBtn = document.getElementById('mute-btn'); // Nút tắt/bật âm thanh
+    const volumeSlider = document.getElementById('volume-slider'); // Thanh điều chỉnh âm lượng 
+    const settingsBtn = document.getElementById('settings-btn'); // Nút cài đặt
+    const settingsMenu = document.getElementById('settings-menu'); // Menu cài đặt
+    const fullscreenBtn = document.getElementById('fullscreen-btn'); // Nút toàn màn hình
+    const featuredThumbnail = document.querySelector('.featured-thumbnail'); // Khung chứa video
+    const videoControls = document.querySelector('.video-controls'); // Thanh điều khiển video
     
-    if (videoPlayer) {
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        const rewindBtn = document.getElementById('rewind-btn');
-        const forwardBtn = document.getElementById('forward-btn');
-        const progressBar = document.getElementById('progress-bar');
-        const progress = document.getElementById('progress');
-        const currentTimeDisplay = document.getElementById('current-time');
-        const durationDisplay = document.getElementById('duration');
-        const muteBtn = document.getElementById('mute-btn');
-        const volumeSlider = document.getElementById('volume-slider');
-        const settingsBtn = document.getElementById('settings-btn');
-        const settingsMenu = document.getElementById('settings-menu');
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
-        
-        videoPlayer.removeAttribute('controls');
-        document.querySelector('.video-controls').style.opacity = '1';
-        
-        playPauseBtn.addEventListener('click', togglePlayPause);
-        rewindBtn.addEventListener('click', () => { videoPlayer.currentTime -= 10; });
-        forwardBtn.addEventListener('click', () => { videoPlayer.currentTime += 10; });
-        muteBtn.addEventListener('click', toggleMute);
-        volumeSlider.addEventListener('input', setVolume);
-        fullscreenBtn.addEventListener('click', toggleFullscreen);
-        settingsBtn.addEventListener('click', toggleSettings);
-        
-        videoPlayer.addEventListener('timeupdate', updateProgress);
-        progressBar.addEventListener('click', seek);
-        
-        videoPlayer.addEventListener('loadedmetadata', () => {
-            durationDisplay.textContent = formatTime(videoPlayer.duration);
+    // Kiểm tra xem phần tử video có tồn tại không trước khi thực hiện thao tác
+    if (!videoPlayer) return;
+
+    // Đặt trạng thái ban đầu cho nút phát/tạm dừng là PHÁT
+    playPauseBtn.textContent = '▶';
+    
+    // Tạo nút mở rộng cho trình phát video
+    const expandBtn = document.createElement('button');
+    expandBtn.className = 'expand-video-btn'; // CSS để tạo kiểu nút mở rộng
+    expandBtn.innerHTML = '↕';
+    expandBtn.title = 'Expand video';
+    featuredThumbnail.appendChild(expandBtn);
+    
+    // Helper functions
+    function formatTime(timeInSeconds) {
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = Math.floor(timeInSeconds % 60);
+        return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+    }
+    
+    function updateVolumeUI(value) {
+        const isMuted = value === 0;
+        muteBtn.textContent = isMuted ? '🔇' : '🔊';
+        volumeSlider.value = value * 100;
+        videoPlayer.volume = value;
+        videoPlayer.muted = isMuted;
+    }
+    
+    function togglePlayPause() {
+        if (videoPlayer.paused) {
+            videoPlayer.play();
+            playPauseBtn.textContent = '⏸';
+            featuredThumbnail.classList.remove('video-paused');
+        } else {
+            videoPlayer.pause();
+            playPauseBtn.textContent = '▶';
+            featuredThumbnail.classList.add('video-paused');
+        }
+    }
+
+    // Initialize player
+    videoPlayer.addEventListener('loadedmetadata', function() {
+        durationEl.textContent = formatTime(videoPlayer.duration);
+        // Mark as paused initially to show controls
+        featuredThumbnail.classList.add('video-paused');
+    });
+    
+    // Add click event to the video element itself to toggle play/pause
+    videoPlayer.addEventListener('click', function(e) {
+        // Prevent the click from triggering other elements
+        e.stopPropagation();
+        togglePlayPause();
+    });
+    
+    // Expand video button
+    expandBtn.addEventListener('click', function() {
+        featuredThumbnail.classList.toggle('video-expanded');
+        this.innerHTML = featuredThumbnail.classList.contains('video-expanded') ? '↓' : '↕';
+    });
+    
+    // Player controls
+    playPauseBtn.addEventListener('click', togglePlayPause);
+    
+    rewindBtn.addEventListener('click', function() {
+        videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
+    });
+    
+    forwardBtn.addEventListener('click', function() {
+        videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 10);
+    });
+    
+    videoPlayer.addEventListener('timeupdate', function() {
+        const progressPercent = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+        progress.style.width = `${progressPercent}%`;
+        currentTimeEl.textContent = `${formatTime(videoPlayer.currentTime)} / `;
+    });
+    
+    progressBar.addEventListener('click', function(e) {
+        const seekTime = (e.offsetX / this.clientWidth) * videoPlayer.duration;
+        videoPlayer.currentTime = seekTime;
+    });
+    
+    // Volume controls
+    muteBtn.addEventListener('click', function() {
+        const newMuteState = !videoPlayer.muted;
+        updateVolumeUI(newMuteState ? 0 : videoPlayer.volume);
+    });
+    
+    volumeSlider.addEventListener('input', function() {
+        const volumeValue = this.value / 100;
+        updateVolumeUI(volumeValue);
+    });
+    
+    // Settings menu
+    settingsBtn.addEventListener('click', function() {
+        settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
+    });
+    
+    // Add playback speed control
+    document.querySelectorAll('.settings-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const speed = parseFloat(this.getAttribute('data-speed'));
+            if (!isNaN(speed)) {
+                videoPlayer.playbackRate = speed;
+                // Close menu after selection
+                settingsMenu.style.display = 'none';
+            }
         });
-        
-        function togglePlayPause() {
-            if (videoPlayer.paused) {
-                videoPlayer.play();
-                playPauseBtn.textContent = '⏸';
-            } else {
-                videoPlayer.pause();
-                playPauseBtn.textContent = '▶';
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (e.target !== settingsBtn && !settingsMenu.contains(e.target)) {
+            settingsMenu.style.display = 'none';
+        }
+    });
+    
+    // Fullscreen toggle
+    fullscreenBtn.addEventListener('click', function() {
+        if (document.fullscreenElement) {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
             }
-        }
-        
-        function updateProgress() {
-            const percent = (videoPlayer.currentTime / videoPlayer.duration) * 100;
-            progress.style.width = percent + '%';
-            currentTimeDisplay.textContent = formatTime(videoPlayer.currentTime) + ' / ';
-        }
-        
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            seconds = Math.floor(seconds % 60);
-            return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-        }
-        
-        function seek(e) {
-            const rect = progressBar.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / progressBar.offsetWidth;
-            videoPlayer.currentTime = pos * videoPlayer.duration;
-        }
-        
-        function toggleMute() {
-            videoPlayer.muted = !videoPlayer.muted;
-            muteBtn.textContent = videoPlayer.muted ? '🔇' : '🔊';
-            volumeSlider.value = videoPlayer.muted ? 0 : videoPlayer.volume * 100;
-        }
-        
-        function setVolume() {
-            videoPlayer.volume = volumeSlider.value / 100;
-            videoPlayer.muted = (videoPlayer.volume === 0);
-            muteBtn.textContent = videoPlayer.muted ? '🔇' : '🔊';
-        }
-        
-        function toggleSettings() {
-            settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
-        }
-        
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                if (videoPlayer.requestFullscreen) {
-                    videoPlayer.requestFullscreen();
-                } else if (videoPlayer.webkitRequestFullscreen) {
-                    videoPlayer.webkitRequestFullscreen();
-                } else if (videoPlayer.msRequestFullscreen) {
-                    videoPlayer.msRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
+            featuredThumbnail.classList.remove('video-fullscreen');
+        } else {
+            if (featuredThumbnail.requestFullscreen) {
+                featuredThumbnail.requestFullscreen();
+            } else if (featuredThumbnail.webkitRequestFullscreen) {
+                featuredThumbnail.webkitRequestFullscreen();
+            } else if (featuredThumbnail.msRequestFullscreen) {
+                featuredThumbnail.msRequestFullscreen();
             }
+            featuredThumbnail.classList.add('video-fullscreen');
         }
-        
-        const featuredThumbnail = document.querySelector('.featured-thumbnail');
+    });
+    
+    // Handle fullscreen change events
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    
+    function handleFullscreenChange() {
+        if (!document.fullscreenElement && 
+            !document.webkitFullscreenElement && 
+            !document.mozFullScreenElement && 
+            !document.msFullscreenElement) {
+            featuredThumbnail.classList.remove('video-fullscreen');
+        }
+    }
+    
+    // Controls visibility
+    if (featuredThumbnail && videoControls) {
         featuredThumbnail.addEventListener('mouseenter', () => {
-            document.querySelector('.video-controls').style.opacity = '1';
+            videoControls.style.opacity = '1';
         });
         
         featuredThumbnail.addEventListener('mouseleave', () => {
             if (!videoPlayer.paused) {
-                document.querySelector('.video-controls').style.opacity = '0';
+                videoControls.style.opacity = '0';
             }
         });
     }

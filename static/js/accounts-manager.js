@@ -1,56 +1,57 @@
+// Trang quản lý tài khoản người dùng
 document.addEventListener('DOMContentLoaded', function() {
-    // DOM Elements
-    const accountTable = document.getElementById('accountTable');
-    const accountModal = document.getElementById('accountModal');
-    const deleteModal = document.getElementById('deleteModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const accountForm = document.getElementById('accountForm');
-    const addAccountBtn = document.getElementById('addAccountBtn');
-    const roleFilter = document.getElementById('roleFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    const filterBtn = document.querySelector('.filter-section .btn-secondary');
+    // Lấy tham chiếu đến các phần tử DOM
+    const accountTable = document.getElementById('accountTable'); // Bảng danh sách tài khoản
+    const accountModal = document.getElementById('accountModal'); // Modal thêm/sửa tài khoản
+    const deleteModal = document.getElementById('deleteModal'); // Modal xác nhận xóa
+    const modalTitle = document.getElementById('modalTitle'); // Tiêu đề modal
+    const accountForm = document.getElementById('accountForm'); // Form thông tin tài khoản
+    const addAccountBtn = document.getElementById('addAccountBtn'); // Nút thêm tài khoản mới
+    const roleFilter = document.getElementById('roleFilter'); // Bộ lọc theo vai trò
+    const statusFilter = document.getElementById('statusFilter'); // Bộ lọc theo trạng thái
+    const filterBtn = document.querySelector('.filter-section .btn-secondary'); // Nút áp dụng bộ lọc
     
-    // State variables
-    let currentPage = 1;
-    let totalPages = 1;
-    let currentAccountId = null;
-    let deleteAccountId = null;
+    // Biến trạng thái
+    let currentPage = 1; // Trang hiện tại
+    let totalPages = 1; // Tổng số trang
+    let currentAccountId = null; // ID tài khoản đang chỉnh sửa
+    let deleteAccountId = null; // ID tài khoản cần xóa
     
-    // Initialize the page
+    // Khởi tạo trang
     init();
     
-    // Event Listeners
-    addAccountBtn.addEventListener('click', openAddAccountModal);
-    accountForm.addEventListener('submit', handleFormSubmit);
-    document.getElementById('saveBtn').addEventListener('click', handleFormSubmit);
-    document.getElementById('cancelBtn').addEventListener('click', closeAccountModal);
-    document.getElementById('confirmDeleteBtn').addEventListener('click', deleteAccount);
-    document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
+    // Đăng ký các trình xử lý sự kiện
+    addAccountBtn.addEventListener('click', openAddAccountModal); // Mở modal thêm tài khoản
+    accountForm.addEventListener('submit', handleFormSubmit); // Xử lý submit form
+    document.getElementById('saveBtn').addEventListener('click', handleFormSubmit); // Nút lưu
+    document.getElementById('cancelBtn').addEventListener('click', closeAccountModal); // Nút hủy
+    document.getElementById('confirmDeleteBtn').addEventListener('click', deleteAccount); // Xác nhận xóa
+    document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal); // Hủy xóa
     document.querySelectorAll('.modal .close').forEach(close => {
         close.addEventListener('click', function() {
-            accountModal.style.display = 'none';
-            deleteModal.style.display = 'none';
+            accountModal.style.display = 'none'; // Đóng modal account
+            deleteModal.style.display = 'none'; // Đóng modal xóa
         });
     });
-    filterBtn.addEventListener('click', applyFilters);
+    filterBtn.addEventListener('click', applyFilters); // Áp dụng bộ lọc
     
-    // Initialize the page
+    // Khởi tạo trang - Tải dữ liệu ban đầu
     function init() {
-        AppNotification.showLoading('Đang tải dữ liệu tài khoản...');
-        loadAccounts();
-        setupPagination();
+        AppNotification.showLoading('Đang tải dữ liệu tài khoản...'); // Hiển thị trạng thái đang tải
+        loadAccounts(); // Tải danh sách tài khoản
+        setupPagination(); // Thiết lập phân trang
     }
     
-    // Load accounts with optional filters
+    // Tải danh sách tài khoản với bộ lọc tùy chọn
     function loadAccounts(page = 1, filters = {}) {
-        // Construct URL with pagination and filters
+        // Xây dựng URL với tham số phân trang và bộ lọc
         let url = `/admin/accounts/api/list?page=${page}`;
         
-        // Add filters if provided
+        // Thêm các bộ lọc nếu có
         if (filters.role) url += `&role=${filters.role}`;
         if (filters.status) url += `&status=${filters.status}`;
         
-        // Fetch accounts from the API
+        // Gọi API để lấy danh sách tài khoản
         fetch(url)
             .then(response => {
                 if (!response.ok) {
@@ -59,28 +60,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                // Check if data has an error property
+                // Kiểm tra nếu data có thuộc tính error
                 if (data.error) {
                     throw new Error(data.error);
                 }
                 
+                // Cập nhật biến trạng thái
                 currentPage = data.currentPage;
                 totalPages = data.totalPages;
-                renderAccounts(data.accounts);
-                updatePagination();
-                AppNotification.hideLoading();
+                renderAccounts(data.accounts); // Render danh sách tài khoản
+                updatePagination(); // Cập nhật phân trang
+                AppNotification.hideLoading(); // Ẩn trạng thái loading
             })
             .catch(error => {
                 console.error('Error loading accounts:', error);
-                AppNotification.hideLoading();
+                AppNotification.hideLoading(); // Ẩn trạng thái loading
                 
-                // Show error notification with retry button
+                // Hiển thị thông báo lỗi với nút thử lại
                 AppNotification.showErrorWithRetry(
                     'Lỗi khi tải dữ liệu tài khoản: ' + error.message, 
-                    () => loadAccounts(page, filters)
+                    () => loadAccounts(page, filters) // Hàm callback để thử lại
                 );
                 
-                // Show empty state in the table
+                // Hiển thị trạng thái rỗng trong bảng
                 const tbody = accountTable.querySelector('tbody');
                 tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">
                     <div style="padding: 20px;">
@@ -93,11 +95,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
-    // Render accounts in the table
+    // Render danh sách tài khoản vào bảng
     function renderAccounts(accounts) {
         const tbody = accountTable.querySelector('tbody');
         tbody.innerHTML = '';
         
+        // Hiển thị thông báo nếu không có tài khoản
         if (accounts.length === 0) {
             const row = document.createElement('tr');
             row.innerHTML = `<td colspan="8" style="text-align: center;">Không có tài khoản nào được tìm thấy</td>`;
@@ -105,21 +108,22 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Tạo từng dòng cho mỗi tài khoản
         accounts.forEach(account => {
             const row = document.createElement('tr');
             
-            // Format date nicely
+            // Format ngày đăng ký thân thiện
             let formattedDate = 'N/A';
             if (account.registerDate) {
                 const registerDate = new Date(account.registerDate);
                 formattedDate = registerDate.toLocaleDateString('vi-VN');
             }
             
-            // Create status badge
+            // Tạo badge trạng thái (hoạt động/bị khóa)
             const statusClass = account.status === 'active' ? 'status-active' : 'status-inactive';
             const statusText = account.status === 'active' ? 'Hoạt động' : 'Bị khóa';
             
-            // Map role values to display text
+            // Ánh xạ giá trị vai trò sang văn bản hiển thị
             const roleDisplay = {
                 'admin': 'Quản trị viên',
                 'moderator': 'Điều hành viên',
@@ -127,15 +131,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 'vip': 'VIP'
             };
             
-            // Default avatar if missing
-            const avatar = account.avatar || '../static/images/avatar_default.png';
-            
-            // Use the numeric id instead of MongoDB _id
+            // Sử dụng ID số thay vì MongoDB _id
             row.innerHTML = `
                 <td>${account.id || 'N/A'}</td>
-                <td><img src="${avatar}" alt="Avatar" onerror="this.src='/static/images/avatar_user.png'" style="width: 40px; height: 40px; border-radius: 50%;"></td>
+                <td><img src="../static/images/avatar_user.png" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;"></td>
                 <td>${account.username || 'N/A'}</td>
-                <td>${account.email || 'N/A'}</td>
                 <td>${roleDisplay[account.role] || account.role || 'User'}</td>
                 <td>${formattedDate}</td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -152,30 +152,30 @@ document.addEventListener('DOMContentLoaded', function() {
             tbody.appendChild(row);
         });
         
-        // Add event listeners to the new buttons
+        // Thêm trình xử lý sự kiện cho các nút mới
         attachActionButtonListeners();
     }
     
-    // Attach event listeners to action buttons
+    // Gắn trình xử lý sự kiện cho các nút hành động
     function attachActionButtonListeners() {
-        // Edit buttons
+        // Nút chỉnh sửa
         document.querySelectorAll('.edit-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const accountId = this.getAttribute('data-id');
-                openEditAccountModal(accountId);
+                openEditAccountModal(accountId); // Mở modal chỉnh sửa
             });
         });
         
-        // Delete buttons
+        // Nút xóa
         document.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const accountId = this.getAttribute('data-id');
                 const accountName = this.getAttribute('data-name');
-                openDeleteModal(accountId, accountName);
+                openDeleteModal(accountId, accountName); // Mở modal xác nhận xóa
             });
         });
     }
-    
+
     // Setup pagination controls
     function setupPagination() {
         const pagination = document.querySelector('.pagination');
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Fill form with account data
                 document.getElementById('accountId').value = account.mongo_id || account.id;
                 document.getElementById('username').value = account.username;
-                document.getElementById('email').value = account.email || '';
+
                 document.getElementById('password').value = ''; // Don't show password
                 document.getElementById('fullName').value = account.fullName || '';
                 document.getElementById('role').value = account.role;
@@ -337,15 +337,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Get form data
         const formData = new FormData(accountForm);
-        
-        // For update, we need to handle the case where email is unchanged
-        if (currentAccountId) {
-            // If updating, add a special marker if email field is unchanged
-            const emailField = document.getElementById('email');
-            if (emailField.readOnly && !emailField.value.trim()) {
-                formData.set('email', '__NO_CHANGE__');
-            }
-        }
         
         // Validate required fields
         const username = formData.get('username');

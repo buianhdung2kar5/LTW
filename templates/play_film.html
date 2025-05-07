@@ -12,7 +12,7 @@
             <div class="featured-thumbnail">
                 <div class="video-placeholder">
                     {% if film and film.source_film %}
-                        <video id="video-player" controls width="100%" height="100%">
+                        <video id="video-player" width="100%" height="100%">
                             <source src="{{ film.source_film }}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
@@ -34,14 +34,16 @@
                             <div class="settings-control">
                                 <button id="settings-btn" class="control-btn">⚙️</button>
                                 <div id="settings-menu" class="settings-menu">
-                                    <div class="settings-item">Cài đặt (Chưa có tùy chọn)</div>
+                                    <div class="settings-item" data-speed="0.5">0.5x</div>
+                                    <div class="settings-item" data-speed="1.0">1.0x</div>
+                                    <div class="settings-item" data-speed="1.5">1.5x</div>
+                                    <div class="settings-item" data-speed="2.0">2.0x</div>
                                 </div>
                             </div>
                             <button id="fullscreen-btn" class="control-btn">⛶</button>
                         </div>
                     {% else %}
-                        <div class="play-button"></div>
-                        <p class="no-video-source">Không có nguồn video để phát.</p>
+                        <div class="no-video-source">Không có nguồn video để phát.</div>
                     {% endif %}
                 </div>
             </div>

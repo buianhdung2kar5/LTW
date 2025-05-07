@@ -6,6 +6,11 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/film_details.css') }}">
 
 <div class="content">
+    <!-- Add a hidden element with user login status -->
+    {% if user_id %}
+    <script>document.body.classList.add('logged-in');</script>
+    {% endif %}
+    
     <section class="featured-film">
         <div class="featured-container">
             <div class="featured-thumbnail">
@@ -27,9 +32,9 @@
                         <span id="favorite-text">THÊM VÀO YÊU THÍCH</span>
                     </button>
                     {% else %}
-                    <a href="{{ url_for('login') }}"><button class="add-to-list-btn">
-                        <i class="fas fa-heart"></i> đăng nhập đi
-                    </button></a>
+                    <button class="add-to-list-btn login-btn" id="details-login-btn" data-film-id="{{ film.id }}">
+                        <i class="fas fa-heart"></i> ĐĂNG NHẬP
+                    </button>
                     {% endif %}
                 </div>
                 <hr class="separator">
@@ -84,6 +89,40 @@
         </div>
     </div>
 </div>
+
+    <!-- Modal Đăng nhập -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <form id="login-form" method="POST" action="/auth/login">
+                <h2>Tên đăng nhập</h2>
+                <input type="text" name="username" class="modal-input" placeholder="Tên đăng nhập" required>
+                <h2>Mật khẩu</h2>
+                <input type="password" name="password" class="modal-input" placeholder="Mật khẩu" required>
+                <button type="submit" class="modal-btn">Đăng nhập</button>
+                <p class="forgot-password">Bạn chưa có tài khoản? <a href="#" id="show-register">Đăng ký ngay</a></p>
+                <div id="login-error" class="error-message" style="display: none; color: red; margin-top: 10px;"></div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal Đăng ký -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <form id="register-form" method="POST" action="/auth/register">
+                <h2>Tên đăng nhập</h2>
+                <input type="text" name="username" class="modal-input" placeholder="Tên đăng nhập" required>
+                <h2>Mật khẩu</h2>
+                <input type="password" name="password" class="modal-input" placeholder="Mật khẩu" required>
+                <h2>Nhập lại mật khẩu</h2>
+                <input type="password" name="confirm-password" class="modal-input" placeholder="Nhập lại mật khẩu" required>
+                <button type="submit" class="modal-btn">Đăng ký</button>
+                <p class="forgot-password">Bạn đã có tài khoản? <a href="#" id="show-login">Đăng nhập ngay</a></p>
+                <div id="register-error" class="error-message" style="display: none; color: red; margin-top: 10px;"></div>
+            </form>
+        </div>
+    </div>
 
 <div id="notification-container" class="notification-container"></div>
 

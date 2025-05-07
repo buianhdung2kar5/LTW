@@ -30,13 +30,15 @@
                 </div>
                 <div class="account-buttons-right">
                     <a href="/films/favorites" class="action-btn">Phim yêu thích</a>
+                    {% if user.role == 'admin' %}
                     <a href="/admin/films" class="action-btn">Quản lý phim</a>
                     <a href="/admin/accounts" class="action-btn">Quản lý tài khoản</a>
+                    {% endif %}
                 </div>
             </div>
             <div class="account-actions">
                 <button class="action-btn" id="change-password-btn">Đổi mật khẩu</button>
-                <button class="action-btn logout-btn" id="logout-btn">Đăng xuất</button>
+                <a href="/auth/logout" class="action-btn logout-btn">Đăng xuất</a>
             </div>
         </div>
     </div>

@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, session
 import os
 import json
 from datetime import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from functools import wraps  # Add this import
 
 # Create a blueprint for admin routes
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -92,80 +93,97 @@ def get_next_user_id(db):
             # If all else fails, return 1
             return 1
 
+# Admin access required decorator
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            # Chuyển hướng về trang đăng nhập nếu chưa đăng nhập
+            return redirect(url_for('home'))
+        
+        # Kiểm tra người dùng có phải là admin không
+        client, db = get_db()
+        if db is None:
+            # Chuyển hướng về trang chủ nếu kết nối cơ sở dữ liệu thất bại
+            return redirect(url_for('home'))
+        
+        try:
+            user_id = session.get('user_id')  # Lấy ID người dùng từ session
+            
+            # Thử tìm người dùng theo ObjectId trước
+            try:
+                user = db.users.find_one({'_id': ObjectId(user_id)})  # Tìm theo MongoDB ObjectId
+            except:
+                # Nếu không phải ObjectId hợp lệ, thử tìm theo ID số
+                try:
+                    user_id_int = int(user_id)
+                    user = db.users.find_one({'id': user_id_int})  # Tìm theo ID số
+                except:
+                    user = None
+            
+            if not user or user.get('role') != 'admin':
+                # Chuyển hướng về trang chủ nếu không phải admin
+                return redirect(url_for('home'))
+                
+        except Exception as e:
+            # Chuyển hướng về trang chủ nếu có lỗi
+            return redirect(url_for('home'))
+        finally:
+            if client:
+                client.close()  # Đóng kết nối cơ sở dữ liệu
+        
+        return f(*args, **kwargs)  # Tiếp tục thực hiện hàm nếu là admin
+    return decorated_function
+
 # API routes for account management
 @admin_bp.route('/accounts/api/list')
 def list_accounts():
     page = int(request.args.get('page', 1))
     role_filter = request.args.get('role', '')
     status_filter = request.args.get('status', '')
-                    
+    
     client, db = get_db()
     if db is None:
-        return jsonify({'accounts': [], 'currentPage': 1, 'totalPages': 1})
+        return jsonify({'error': 'Database connection failed', 'accounts': [], 'currentPage': 1, 'totalPages': 1}), 500
     
     try:
-        # Build query based on filters
+        # Build query and pagination parameters
         query = {}
-        if role_filter:
-            query['role'] = role_filter
-        if status_filter:
-            query['status'] = status_filter
+        if role_filter: query['role'] = role_filter
+        if status_filter: query['status'] = status_filter
         
-        # Pagination
         per_page = 8
         skip = (page - 1) * per_page
         
-        # Count total documents for pagination
-        try:
-            total_accounts = db.users.count_documents(query)
-        except Exception as count_error:
-            print(f"Error counting accounts: {str(count_error)}")
-            total_accounts = 0
-        
+        # Get total count for pagination
+        total_accounts = db.users.count_documents(query)
         total_pages = max(1, (total_accounts + per_page - 1) // per_page)
         
-        # Get accounts from MongoDB with error handling
-        try:
-            accounts_cursor = db.users.find(query).skip(skip).limit(per_page)
-            accounts = []
-            for account in accounts_cursor:
-                try:
-                    # Convert ObjectId to string
-                    account['_id'] = str(account['_id'])
-                    account['mongo_id'] = account['_id']  # For compatibility with existing code
-                    
-                    # Ensure each account has a sequential ID
-                    if 'id' not in account or account['id'] is None:
-                        try:
-                            # Generate a new sequential ID
-                            new_id = get_next_user_id(db)
-                            
-                            # Update the document with the new ID
-                            db.users.update_one(
-                                {'_id': ObjectId(account['_id'])},
-                                {'$set': {'id': new_id}}
-                            )
-                            
-                            # Update in our local account object
-                            account['id'] = new_id      
-                        except Exception as id_error:
-                            print(f"Error assigning ID to account: {str(id_error)}")
-                            account['id'] = 0  # Use 0 as a temporary ID
-                    accounts.append(account)
-                except Exception as account_error:                
-                    print(f"Error processing account: {str(account_error)}")
-                    continue
-        except Exception as cursor_error:
-            print(f"Error retrieving accounts: {str(cursor_error)}")
-            accounts = []
-        
+        # Fetch accounts with pagination
+        accounts = []
+        for account in db.users.find(query).skip(skip).limit(per_page):
+            # Convert ObjectId to string and ensure ID exists
+            account['_id'] = str(account['_id'])
+            account['mongo_id'] = account['_id']
+            
+            # Ensure sequential ID exists
+            if 'id' not in account or account['id'] is None:
+                new_id = get_next_user_id(db)
+                db.users.update_one(
+                    {'_id': ObjectId(account['_id'])},
+                    {'$set': {'id': new_id}}
+                )
+                account['id'] = new_id
+                
+            accounts.append(account)
+            
         return jsonify({
             'accounts': accounts,
             'currentPage': page,
             'totalPages': total_pages
         })
     except Exception as e:
-        print(f"General error in list_accounts: {str(e)}")
+        print(f"Error in list_accounts: {str(e)}")
         return jsonify({
             'error': str(e),
             'accounts': [],
@@ -355,20 +373,20 @@ def list_films():
                     })
             film['genres'] = film_genres
             
-            # Filter by status if specified
+            # Lọc theo trạng thái nếu được chỉ định
             if status and film['status'] != status:
                 continue
             
-            # Filter by genre slugs if specified
+            # Lọc theo thể loại phim nếu được chỉ định
             if genre_slugs:
-                # Check if any of the film's genres match the selected genre slugs
+                # Kiểm tra xem bất kỳ thể loại nào của phim có khớp với các thể loại đã chọn không
                 film_genre_slugs = [g.get('slug', '') for g in film_genres]
                 if any(slug in film_genre_slugs for slug in genre_slugs):
                     filtered_films.append(film)
             else:
                 filtered_films.append(film)
         
-        # Return filtered films
+        # Trả về danh sách phim đã lọc
         return jsonify(filtered_films)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -530,6 +548,7 @@ def register_admin_routes(app):
     
     # Register standalone routes
     @app.route('/admin/films')
+    @admin_required
     def films_manager():
         """Films manager page"""
         # Get all genres for the filter dropdown
@@ -537,11 +556,13 @@ def register_admin_routes(app):
         return render_template('films_manager.html', genres=genres)
     
     @app.route('/admin/accounts')
+    @admin_required
     def accounts_manager():
         """Accounts manager page"""
         return render_template('accounts_manager.html')
     
     @app.route('/admin/')
+    @admin_required
     def admin_dashboard():
         """Admin dashboard - redirects to films manager"""
         return redirect(url_for('films_manager'))

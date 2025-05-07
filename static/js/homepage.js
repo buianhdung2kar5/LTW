@@ -20,82 +20,72 @@ document.addEventListener('DOMContentLoaded', () => {
     let isScrolling = false;
 
     // Hàm làm mượt chuyển đổi vị trí
-    const smoothScrollTo = (targetScroll, duration) => {
+    function smoothScroll(target) {
         if (isScrolling) return;
         isScrolling = true;
-
-        const startScroll = carousel.scrollLeft;
-        const distance = targetScroll - startScroll;
+        
+        const startPosition = carousel.scrollLeft;
+        const distance = target - startPosition;
+        const duration = 500; // ms
         let startTime = null;
-
-        const animation = (currentTime) => {
-            if (!startTime) startTime = currentTime;
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const ease = progress * (2 - progress); // Ease-in-out
-            carousel.scrollLeft = startScroll + distance * ease;
-
-            if (progress < 1) {
+        
+        function animation(currentTime) {
+            if (startTime === null) startTime = currentTime;
+            const timeElapsed = currentTime - startTime;
+            const progress = Math.min(timeElapsed / duration, 1);
+            const easeInOut = progress < 0.5 
+                ? 2 * progress * progress 
+                : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                
+            carousel.scrollLeft = startPosition + distance * easeInOut;
+            
+            if (timeElapsed < duration) {
                 requestAnimationFrame(animation);
             } else {
                 isScrolling = false;
+                // Kiểm tra vòng lặp
+                if (carousel.scrollLeft >= maxScroll) {
+                    carousel.scrollLeft = 0;
+                } else if (carousel.scrollLeft <= 0) {
+                    carousel.scrollLeft = maxScroll - itemWidth;
+                }
             }
-        };
-
+        }
+        
         requestAnimationFrame(animation);
-    };
-
-    // Hàm cuộn tùy chỉnh
-    const customScrollBy = (distance, duration) => {
-        if (isScrolling) return;
-        isScrolling = true;
-
-        const startScroll = carousel.scrollLeft;
-        const targetScroll = startScroll + distance;
-        let startTime = null;
-
-        const animation = (currentTime) => {
-            if (!startTime) startTime = currentTime;
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const ease = progress * (2 - progress); // Ease-in-out
-            carousel.scrollLeft = startScroll + distance * ease;
-
-            if (progress < 1) {
-                requestAnimationFrame(animation);
-            } else {
-                isScrolling = false;
-            }
-        };
-
-        requestAnimationFrame(animation);
-    };
-
-    // Cuộn sang trái khi nhấn nút "prev"
+    }
+    
+    // Sự kiện click nút prev
     prevBtn.addEventListener('click', () => {
-        const currentScroll = carousel.scrollLeft;
-        if (currentScroll <= itemWidth / 2) {
-            // Khi ở đầu, nhảy đến cuối và cuộn mượt
-            smoothScrollTo(maxScroll, 300);
-            setTimeout(() => {
-                customScrollBy(-itemWidth, 600); // Cuộn ngược 1 item trong 600ms
-            }, 300);
-        } else {
-            customScrollBy(-itemWidth, 600); // Cuộn ngược 1 item trong 600ms
-        }
+        const target = carousel.scrollLeft - (itemWidth * 3);
+        smoothScroll(target);
     });
-
-    // Cuộn sang phải khi nhấn nút "next"
+    
+    // Sự kiện click nút next
     nextBtn.addEventListener('click', () => {
-        const currentScroll = carousel.scrollLeft;
-        if (currentScroll >= maxScroll - itemWidth / 2) {
-            // Khi gần cuối, nhảy về đầu và cuộn mượt
-            smoothScrollTo(0, 300);
-            setTimeout(() => {
-                customScrollBy(itemWidth, 600); // Cuộn tiếp 1 item trong 600ms
-            }, 300);
-        } else {
-            customScrollBy(itemWidth, 600); // Cuộn tiếp 1 item trong 600ms
+        const target = carousel.scrollLeft + (itemWidth * 3);
+        smoothScroll(target);
+    });
+    
+    // Tự động chuyển slide sau mỗi 5 giây
+    let autoScrollInterval = setInterval(() => {
+        if (!document.hidden) {
+            const target = carousel.scrollLeft + (itemWidth * 3);
+            smoothScroll(target);
         }
+    }, 5000);
+    
+    // Xử lý khi người dùng tương tác với carousel
+    carousel.addEventListener('mouseenter', () => {
+        clearInterval(autoScrollInterval);
+    });
+    
+    carousel.addEventListener('mouseleave', () => {
+        autoScrollInterval = setInterval(() => {
+            if (!document.hidden) {
+                const target = carousel.scrollLeft + (itemWidth * 3);
+                smoothScroll(target);
+            }
+        }, 5000);
     });
 });

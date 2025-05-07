@@ -1,6 +1,6 @@
 /* Common Components CSS */
 
-/* Film Card */
+/* Film Card - Adjust to prevent rendering overlap */
 .film-card {
     position: relative;
     display: flex;
@@ -8,6 +8,10 @@
     text-decoration: none;
     transition: transform 0.3s ease;
     overflow: hidden;
+    margin-bottom: 15px; /* Add space between cards */
+    height: auto; /* Let height be determined by content */
+    width: 100%; /* Ensure card takes full width of its grid cell */
+    box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .film-card:hover {
@@ -16,6 +20,7 @@
 
 .film-card .placeholder-image {
     width: 100%;
+    height: 270px; /* Fixed height for consistency */
     border-radius: 10px;
     background-color: #333;
     transition: opacity 0.3s ease;
@@ -31,7 +36,7 @@
     transform: translate(-50%, -50%);
     width: 50px;
     height: 50px;
-    background: url('/static/images/play_button.png') no-repeat center center;
+    background: url('../images/play_button.png') no-repeat center center;
     background-size: contain;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -147,12 +152,18 @@
     color: #ddd;
 }
 
-/* Film Grid */
+/* Film Grid - Improved to prevent overlap */
 .film-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
     width: 100%;
+    margin-bottom: 30px;
+}
+
+/* Ensure film cards don't overflow their container */
+.film-grid > * {
+    min-width: 0; /* Prevent grid items from expanding beyond their cells */
 }
 
 .no-results {

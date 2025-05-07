@@ -10,8 +10,8 @@ def api_login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            return jsonify({'success': False, 'message': 'Login required'}), 401
-        return f(*args, **kwargs)
+            return jsonify({'success': False, 'message': 'Login required'}), 401  # Trả về lỗi 401 nếu chưa đăng nhập
+        return f(*args, **kwargs)  # Tiếp tục thực hiện hàm nếu đã đăng nhập
     return decorated_function
 
 def register_api_routes(app):
