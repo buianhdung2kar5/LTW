@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if film %}{{ film.title }}{% else %}Chi tiết phim{% endif %}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/film_details.css') }}">
+
+<div class="content">
+    <!-- Add a hidden element with user login status -->
+    {% if user_id %}
+    <script>document.body.classList.add('logged-in');</script>
+    {% endif %}
+    
+    <section class="featured-film">
+        <div class="featured-container">
+            <div class="featured-thumbnail">
+                <div class="placeholder-image"{% if film and film.poster_path %} style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}></div>
+            </div>
+            <div class="featured-details">
+                <h1 class="film-title">{% if film %}{{ film.title }}{% else %}TÊN PHIM{% endif %}</h1>
+                <div class="film-info">
+                    <p><span class="label">Thể loại:</span> {% if film and film.genres %}{{ film.genres | join(', ') }}{% else %}Không có{% endif %}</p>
+                    <p><span class="label">Năm phát hành:</span> {% if film and film.release_year %}{{ film.release_year }}{% else %}N/A{% endif %}</p>
+                    <p><span class="label">Thời lượng:</span> {% if film and film.length %}{{ film.length }} phút{% else %}N/A{% endif %}</p>
+                    <p><span class="label">Điểm đánh giá:</span> {% if film and film.rating %}{{ film.rating }}/10{% else %}N/A{% endif %}</p>
+                </div>
+                <div class="featured-buttons">
+                    <a href="{% if film %}{{ url_for('watch_film', film_id=film.id) }}{% else %}#{% endif %}"><button class="watch-now-btn">XEM NGAY ➤</button></a>
+                    {% if user_id %}
+                    <button class="add-to-list-btn" id="favorite-btn" data-film-id="{{ film.id }}">
+                        <i class="fas fa-heart" id="heart-icon"></i> 
+                        <span id="favorite-text">THÊM VÀO YÊU THÍCH</span>
+                    </button>
+                    {% else %}
+                    <button class="add-to-list-btn login-btn" id="details-login-btn" data-film-id="{{ film.id }}">
+                        <i class="fas fa-heart"></i> ĐĂNG NHẬP
+                    </button>
+                    {% endif %}
+                </div>
+                <hr class="separator">
+                <div class="film-description">
+                    <p class="description">Nội dung phim</p>
+                    <p class="description-text">{% if film and film.description %}{{ film.description }}{% else %}Chưa có mô tả chi tiết{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-content-wrapper">
+        <section class="main-film-list">
+            <h2>CÓ THỂ BẠN MUỐN XEM</h2>
+            <div class="film-grid">
+                {% if related_films %}
+                    {% for film in related_films %}
+                    <a href="{{ url_for('film_details', film_id=film.id) }}" class="film-card">
+                        <div class="placeholder-image" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}>
+                            <div class="play-button"></div>
+                            <div class="film-meta">
+                                <span class="quality">Vietsub - HD</span>
+                            </div>
+                        </div>
+                        <div class="film-info">
+                            <div class="film-title-list">{{ film.title }}</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-results">Không có phim liên quan</p>
+                {% endif %}
+            </div>
+        </section>
+        
+        <div class="top-films-sidebar">
+            <h2>TOP PHIM</h2>
+            <div class="top-films-list">
+                {% for film in top_films %}
+                <a href="{{ url_for('film_details', film_id=film.id) }}" class="top-film-item">
+                    <div class="top-film-thumbnail" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}></div>
+                    <div class="top-film-info">
+                        <div class="top-film-title">{{ film.title }}</div>
+                        <div class="top-film-meta">
+                            <span class="quality">Vietsub - HD</span>
+                            <span class="views">{{ film.views|default('1K+') }} lượt xem</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Modal Đăng nhập -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <form id="login-form" method="POST" action="/auth/login">
+                <h2>Tên đăng nhập</h2>
+                <input type="text" name="username" class="modal-input" placeholder="Tên đăng nhập" required>
+                <h2>Mật khẩu</h2>
+                <input type="password" name="password" class="modal-input" placeholder="Mật khẩu" required>
+                <button type="submit" class="modal-btn">Đăng nhập</button>
+                <p class="forgot-password">Bạn chưa có tài khoản? <a href="#" id="show-register">Đăng ký ngay</a></p>
+                <div id="login-error" class="error-message" style="display: none; color: red; margin-top: 10px;"></div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal Đăng ký -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <form id="register-form" method="POST" action="/auth/register">
+                <h2>Tên đăng nhập</h2>
+                <input type="text" name="username" class="modal-input" placeholder="Tên đăng nhập" required>
+                <h2>Mật khẩu</h2>
+                <input type="password" name="password" class="modal-input" placeholder="Mật khẩu" required>
+                <h2>Nhập lại mật khẩu</h2>
+                <input type="password" name="confirm-password" class="modal-input" placeholder="Nhập lại mật khẩu" required>
+                <button type="submit" class="modal-btn">Đăng ký</button>
+                <p class="forgot-password">Bạn đã có tài khoản? <a href="#" id="show-login">Đăng nhập ngay</a></p>
+                <div id="register-error" class="error-message" style="display: none; color: red; margin-top: 10px;"></div>
+            </form>
+        </div>
+    </div>
+
+<div id="notification-container" class="notification-container"></div>
+
+<script src="{{ url_for('static', filename='js/film_details.js') }}"></script>
+{% endblock %}

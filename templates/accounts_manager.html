@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tài Khoản - Admin Panel</title>
+    <link rel="stylesheet" href="../static/css/accounts_manager.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="/">
+                <img src="../static/images/logo.png" alt="Logo">
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('films_manager') }}">QUẢN LÝ PHIM</a></li>
+                <li><a href="{{ url_for('accounts_manager') }}" class="active">QUẢN LÝ TÀI KHOẢN</a></li>
+            </ul>
+        </nav>
+        <div class="user-actions">
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">ĐĂNG XUẤT</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="admin-header">
+            <h1>QUẢN LÝ TÀI KHOẢN</h1>
+            <button id="addAccountBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Thêm Tài Khoản Mới</button>
+        </section>
+
+        <section class="filter-section">
+            <div class="filter-group">
+                <label for="roleFilter">Vai trò:</label>
+                <select id="roleFilter">
+                    <option value="">Tất cả</option>
+                    <option value="admin">Quản trị viên</option>
+                    <option value="user">Người dùng</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="statusFilter">Trạng thái:</label>
+                <select id="statusFilter">
+                    <option value="">Tất cả</option>
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Bị khóa</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary"><i class="fas fa-filter"></i> Lọc</button>
+        </section>
+
+        <section class="account-list">
+            <table id="accountTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Ảnh</th>
+                        <th>Tên người dùng</th>
+                        <th>Vai trò</th>
+                        <th>Ngày đăng ký</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu mẫu -->
+                </tbody>
+            </table>
+            <div class="pagination">
+                <button class="btn-page"><i class="fas fa-angle-left"></i></button>
+                <button class="btn-page active">1</button>
+                <button class="btn-page">2</button>
+                <button class="btn-page">3</button>
+                <button class="btn-page"><i class="fas fa-angle-right"></i></button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal thêm/sửa tài khoản -->
+    <div id="accountModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Thêm Tài Khoản Mới</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="accountForm" enctype="multipart/form-data" novalidate>
+                    <input type="hidden" id="accountId" name="accountId">
+                    <div class="form-group">
+                        <label for="username">Tên người dùng:</label>
+                        <input type="text" id="username" name="username">
+                        <small style="color: #e94560;">* Bắt buộc</small>
+                    </div>
+                    <div class="form-group">
+                      <label for="password">Mật khẩu:</label>
+                        <input type="password" id="password" name="password">
+                        <small style="color: #e94560;">* Bắt buộc cho tài khoản mới</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="fullName">Họ và tên:</label>
+                        <input type="text" id="fullName" name="fullName">
+                        <small style="color: #aaa;">Tùy chọn</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Vai trò:</label>
+                        <select id="role" name="role">
+                            <option value="admin">Quản trị viên</option>
+                            <option value="user">Người dùng</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Trạng thái:</label>
+                        <select id="status" name="status">
+                            <option value="active">Hoạt động</option>
+                            <option value="inactive">Bị khóa</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">Hủy</button>
+                        <button type="button" class="btn btn-primary" id="saveBtn">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal xác nhận xóa -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content delete-modal">
+            <div class="modal-header">
+                <h2>Xác nhận xóa</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa tài khoản "<span id="deleteAccountName"></span>"?</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Hủy</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Xóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <a href="/"><img src="../static/images/logo.png" alt="Logo"></a>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>QUẢN LÝ</h4>
+                    <ul>
+                        <li><a href="{{ url_for('films_manager') }}">Quản lý phim</a></li>
+                        <li><a href="{{ url_for('accounts_manager') }}">Quản lý tài khoản</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>THÔNG TIN</h4>
+                    <ul>
+                        <li><a href="/admin/guide">Hướng dẫn sử dụng</a></li>
+                        <li><a href="/admin/privacy">Chính sách bảo mật</a></li>
+                        <li><a href="/admin/contact">Liên hệ</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2023 PHIM NEU - Hệ thống quản lý phim trực tuyến</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/notification-util.js"></script>
+    <script src="../static/js/accounts-manager.js"></script>
+</body>
+</html>

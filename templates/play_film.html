@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if film %}{{ film.title }}{% else %}Xem Phim{% endif %}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/play_film.css') }}">
+
+<div class="content">
+    <section class="featured-film">
+        <h1 class="film-title">{% if film %}{{ film.title }}{% else %}TÊN PHIM{% endif %}</h1>
+        <div class="featured-content">
+            <div class="featured-thumbnail">
+                <div class="video-placeholder">
+                    {% if film and film.source_film %}
+                        <video id="video-player" width="100%" height="100%">
+                            <source src="{{ film.source_film }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="video-controls">
+                            <button id="play-pause-btn" class="control-btn">⏸</button>
+                            <button id="rewind-btn" class="control-btn skip-btn">⏪</button>
+                            <button id="forward-btn" class="control-btn skip-btn">⏩</button>
+                            <div class="progress-container">
+                                <div id="progress-bar" class="progress-bar">
+                                    <div id="progress" class="progress"></div>
+                                </div>
+                                <span id="current-time">0:00 / </span>
+                                <span id="duration">0:00</span>
+                            </div>
+                            <div class="volume-control">
+                                <button id="mute-btn" class="control-btn">🔊</button>
+                                <input type="range" id="volume-slider" min="0" max="100" value="100">
+                            </div>
+                            <div class="settings-control">
+                                <button id="settings-btn" class="control-btn">⚙️</button>
+                                <div id="settings-menu" class="settings-menu">
+                                    <div class="settings-item" data-speed="0.5">0.5x</div>
+                                    <div class="settings-item" data-speed="1.0">1.0x</div>
+                                    <div class="settings-item" data-speed="1.5">1.5x</div>
+                                    <div class="settings-item" data-speed="2.0">2.0x</div>
+                                </div>
+                            </div>
+                            <button id="fullscreen-btn" class="control-btn">⛶</button>
+                        </div>
+                    {% else %}
+                        <div class="no-video-source">Không có nguồn video để phát.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="main-content-wrapper">
+        <section class="main-film-list">
+            <h2>PHIM LIÊN QUAN</h2>
+            <div class="film-grid">
+                {% if related_films %}
+                    {% for film in related_films %}
+                    <a href="{{ url_for('film_details', film_id=film.id) }}" class="film-card">
+                        <div class="placeholder-image" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}>
+                            <div class="play-button"></div>
+                            <div class="film-meta">
+                                <span class="quality">Vietsub - HD</span>
+                            </div>
+                        </div>
+                        <div class="film-title-list">{{ film.title }}</div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <p>Không có phim liên quan</p>
+                {% endif %}
+            </div>
+        </section>
+        
+        <div class="top-films-sidebar">
+            <h2>TOP PHIM</h2>
+            <div class="top-films-list">
+                {% for film in top_films %}
+                <a href="{{ url_for('film_details', film_id=film.id) }}" class="top-film-item">
+                    <div class="top-film-thumbnail" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}></div>
+                    <div class="top-film-info">
+                        <div class="top-film-title">{{ film.title }}</div>
+                        <div class="top-film-meta">
+                            <span class="quality">Vietsub - HD</span>
+                            <span class="views">{{ film.views|default('1K+') }} lượt xem</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/play_film.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Kết quả tìm kiếm{% endblock %}
+
+{% block content %}
+<!-- Content -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/search_result.css') }}">
+<div class="content">
+    <!-- Featured Film Section -->
+    <section class="featured-film">
+        <!-- Thêm đoạn text tìm kiếm -->
+        <div class="search-result">
+            HIỆN THỊ KẾT QUẢ TÌM KIẾM CỦA: 
+            <span class="search-query">
+                {% if query %}
+                    {{ query }}
+                {% else %}
+                    ....
+                {% endif %}
+            </span>
+        </div>
+        <!-- Thêm danh sách phim bên dưới -->
+        <div class="film-grid">
+            {% if results %}
+                {% for film in results %}
+                <a href="{{ url_for('film_details', film_id=film.id) }}" class="film-card">
+                    <div class="placeholder-image" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}>
+                        <div class="play-button"></div>
+                        <div class="film-meta">
+                            <span class="quality">Vietsub - HD</span>
+                        </div>
+                    </div>
+                    <div class="film-title">{{ film.title }}</div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <p class="no-results">Không tìm thấy kết quả phù hợp.</p>
+            {% endif %}
+        </div>
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if current_page > 1 %}
+            <a href="{{ url_for('search', query=query, page=current_page-1) }}" class="pagination-btn">Trước</a>
+            {% endif %}
+            <span class="page-info">Trang {{ current_page }}/{{ total_pages }}</span>
+            {% if current_page < total_pages %}
+            <a href="{{ url_for('search', query=query, page=current_page+1) }}" class="pagination-btn">Sau</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+    <div class="main-content-wrapper">
+        <!-- Film List Section (CÓ THỂ BẠN MUỐN XEM) -->
+        <section class="main-film-list">
+            <h2>CÓ THỂ BẠN MUỐN XEM</h2>
+            <div class="film-grid-list">
+                {% if suggested_films %}
+                    {% for film in suggested_films %}
+                    <a href="{{ url_for('film_details', film_id=film.id) }}" class="film-card">
+                        <div class="placeholder-image" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}>
+                            <div class="play-button"></div>
+                            <div class="film-meta">
+                                <span class="quality">Vietsub - HD</span>
+                            </div>
+                        </div>
+                        <div class="film-title-small">{{ film.title }}</div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <!-- Fallback film recommendations -->
+                    {% for i in range(1, 5) %}
+                    <a href="{{ url_for('film_details', film_id=i) }}" class="film-card">
+                        <div class="placeholder-image">
+                            <div class="play-button"></div>
+                            <div class="film-meta">
+                                <span class="quality">Vietsub - HD</span>
+                            </div>
+                        </div>
+                        <div class="film-title-small">Tên phim</div>
+                    </a>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Top Films Sidebar -->
+        <div class="top-films-sidebar">
+            <h2>TOP PHIM</h2>
+            <div class="top-films-list">
+                {% for film in top_films %}
+                <a href="{{ url_for('film_details', film_id=film.id) }}" class="top-film-item">
+                    <div class="top-film-thumbnail" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}></div>
+                    <div class="top-film-info">
+                        <div class="top-film-title">{{ film.title }}</div>
+                        <div class="top-film-meta">
+                            <span class="quality">Vietsub - HD</span>
+                            <span class="views">{{ film.views|default('1K+') }} lượt xem</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

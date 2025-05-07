@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Thể Loại: {{ genre|title }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/film_genres.css') }}">
+
+<div class="content">
+    <section class="genre-section">
+        <div class="film-genres-header">
+            <p>
+                {% if genre.startswith('Kết quả tìm kiếm của:') %}
+                    {{ genre }}
+                {% elif genre == 'KHO PHIM' %}
+                    {{ genre }}
+                {% else %}
+                    THỂ LOẠI: {{ genre|upper }}
+                {% endif %}
+            </p>
+        </div>
+        
+        <div class="main-content-wrapper">
+            <!-- Danh sách phim chính -->
+            <div class="main-film-list">
+                <div class="film-grid">
+                    {% if genre_movies %}
+                        {% for film in genre_movies %}
+                        <a href="{{ url_for('film_details', film_id=film.id) }}" class="film-card">
+                            <div class="placeholder-image" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}>
+                                <div class="play-button"></div>
+                                <div class="film-meta">
+                                    <span class="quality">Vietsub - HD</span>
+                                </div>
+                            </div>
+                            <div class="film-title-small">{{ film.title }}</div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-results">Không tìm thấy phim.</p>
+                    {% endif %}
+                </div>
+                <!-- Nút phân trang -->
+                {% if total_pages > 1 %}
+                <div class="pagination">
+                    {% if current_page > 1 %}
+                    <a href="{{ url_for('genre', genre_slug=genre_slug, page=current_page-1) }}" class="pagination-btn">Trước</a>
+                    {% endif %}
+                    <span class="page-info">Trang {{ current_page }} / {{ total_pages }}</span>
+                    {% if current_page < total_pages %}
+                    <a href="{{ url_for('genre', genre_slug=genre_slug, page=current_page+1) }}" class="pagination-btn">Sau</a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cột Top Phim -->
+            <div class="top-films-sidebar">
+                <h2>TOP PHIM</h2>
+                <div class="top-films-list">
+                    {% for film in top_movies %}
+                    <a href="{{ url_for('film_details', film_id=film.id) }}" class="top-film-item">
+                        <div class="top-film-thumbnail" {% if film.poster_path %}style="background-image: url('{{ film.poster_path }}'); background-size: cover;"{% endif %}></div>
+                        <div class="top-film-info">
+                            <div class="top-film-title">{{ film.title }}</div>
+                            <div class="top-film-meta">
+                                <span class="quality">Vietsub - HD</span>
+                                <span class="views">{{ film.views|default('1K+') }} lượt xem</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

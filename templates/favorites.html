@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Phim Yêu Thích{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/favorites.css') }}">
+
+<div class="content">
+    <div class="main-content-wrapper">
+        <section class="favorite-section">
+            <div class="favorite-header">
+                <h1>PHIM YÊU THÍCH</h1>
+            </div>
+            
+            <div class="film-grid">
+                {% if films %}
+                    {% for film in films %}
+                    <a href="{{ url_for('film_details', film_id=film.id) }}" class="film-card">
+                        <div class="film-poster-wrapper">
+                            {% if film.poster_path|default(film.poster, true) and film.poster_path|default(film.poster, true)|length > 0 %}
+                            <img src="{{ film.poster_path|default(film.poster, true) }}" alt="{{ film.title }}" class="film-poster">
+                            {% else %}
+                            <div class="film-poster-placeholder"></div>
+                            {% endif %}
+                            <div class="play-button"></div>
+                            <div class="film-meta">
+                                <span class="quality">Vietsub - HD</span>
+                            </div>
+                        </div>
+                        <div class="film-title">{{ film.title }}</div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-results">Không có phim nào được tìm thấy</div>
+                {% endif %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if current_page > 1 %}
+                <a href="{{ url_for('favorite.view_favorites', page=current_page-1) }}" class="pagination-btn">Trước</a>
+                {% endif %}
+                
+                <span class="page-info">Trang {{ current_page }}/{{ total_pages }}</span>
+                
+                {% if current_page < total_pages %}
+                <a href="{{ url_for('favorite.view_favorites', page=current_page+1) }}" class="pagination-btn">Sau</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+        
+        <!-- Top Films Sidebar -->
+        <div class="top-films-sidebar">
+            <h2>TOP PHIM</h2>
+            <div class="top-films-list">
+                {% for film in top_films %}
+                <a href="{{ url_for('film_details', film_id=film.id) }}" class="top-film-item">
+                    <div class="top-film-thumbnail" {% if film.poster_path|default(film.poster, true) and film.poster_path|default(film.poster, true)|length > 0 %}style="background-image: url('{{ film.poster_path|default(film.poster, true) }}'); background-size: cover; background-position: center;"{% else %}style="background-color: #222; border: 2px solid #444;"{% endif %}></div>
+                    <div class="top-film-info">
+                        <div class="top-film-title">{{ film.title }}</div>
+                        <div class="top-film-meta">
+                            <span class="quality">Vietsub - HD</span>
+                            <span class="views">{{ film.views if film.views is defined else '1K+' }} lượt xem</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
