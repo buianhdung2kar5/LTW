@@ -18002,3 +18002,152 @@ Traceback (most recent call last):
   File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\network_layer.py", line 359, in receive_data
     raise _OperationCancelled("operation cancelled") from None
 pymongo.errors._OperationCancelled: operation cancelled
+2025-05-08 08:55:12,410 - root - INFO - [THÀNH CÔNG] Kết nối MongoDB Atlas thành công!
+2025-05-08 08:55:12,627 - root - INFO - Không tìm thấy người dùng nào không có ID
+2025-05-08 08:55:13,921 - root - INFO - Index MongoDB được tạo thành công
+2025-05-08 08:55:14,287 - __main__ - INFO - Index favorites được tạo thành công
+2025-05-08 08:55:14,400 - __main__ - INFO - Kết nối MongoDB được khởi tạo cho cơ sở dữ liệu: film-users
+2025-05-08 08:55:14,437 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-05-08 08:55:14,438 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-08 08:55:14,439 - werkzeug - INFO -  * Restarting with stat
+2025-05-08 08:55:19,122 - root - INFO - [THÀNH CÔNG] Kết nối MongoDB Atlas thành công!
+2025-05-08 08:55:19,230 - root - INFO - Không tìm thấy người dùng nào không có ID
+2025-05-08 08:55:20,137 - root - INFO - Index MongoDB được tạo thành công
+2025-05-08 08:55:20,506 - __main__ - INFO - Index favorites được tạo thành công
+2025-05-08 08:55:20,615 - __main__ - INFO - Kết nối MongoDB được khởi tạo cho cơ sở dữ liệu: film-users
+2025-05-08 08:55:20,638 - werkzeug - WARNING -  * Debugger is active!
+2025-05-08 08:55:20,641 - werkzeug - INFO -  * Debugger PIN: 104-116-175
+2025-05-08 08:55:23,517 - utils.db_utils - INFO - MongoDB connection established successfully
+2025-05-08 08:55:24,127 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "GET / HTTP/1.1" 200 -
+2025-05-08 08:55:24,162 - routes.error_handlers - INFO - 404 error: /static/fonts/fontawesome.woff2
+2025-05-08 08:55:24,281 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[33mGET /static/fonts/fontawesome.woff2 HTTP/1.1[0m" 404 -
+2025-05-08 08:55:24,314 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/js/resource-loader.js HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,317 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/images/logo.png HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,317 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/images/search-button.png HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,317 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/css/critical.css HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,735 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/images/avatar_user.png HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,735 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/css/homepage.css HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,741 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/js/base.js HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,741 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/js/homepage.js HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,755 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/js/notification-util.js HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,756 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/js/api-utils.js HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,757 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/css/base.css HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,760 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/css/common.css HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,816 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "[36mGET /static/images/play_button.png HTTP/1.1[0m" 304 -
+2025-05-08 08:55:24,850 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:24] "GET /auth/user-info HTTP/1.1" 200 -
+2025-05-08 08:55:25,430 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:25] "[36mGET /static/js/lazy-loading.js HTTP/1.1[0m" 304 -
+2025-05-08 08:55:25,431 - werkzeug - INFO - 127.0.0.1 - - [08/May/2025 08:55:25] "[36mGET /static/js/cache-utils.js HTTP/1.1[0m" 304 -
+2025-05-08 09:28:49,267 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 1030, in connect
+    networking_interface = _configured_socket_interface(self.address, self.opts)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\pool_shared.py", line 500, in _configured_socket_interface
+    sock = _create_connection(address, options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\pool_shared.py", line 435, in _create_connection
+    raise err
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\pool_shared.py", line 428, in _create_connection
+    sock.connect(sa)
+TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2227, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\topology.py", line 688, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 976, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 1053, in connect
+    _raise_connection_failure(self.address, error, timeout_details=details)
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\pool_shared.py", line 141, in _raise_connection_failure
+    raise NetworkTimeout(msg) from error
+pymongo.errors.NetworkTimeout: ac-bru7v8w-shard-00-02.10h2w59.mongodb.net:27017: timed out (configured timeouts: socketTimeoutMS: 10000.0ms, connectTimeoutMS: 3000.0ms)
+2025-05-08 10:51:19,160 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 411, in command
+    return command(
+           ^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\network.py", line 198, in command
+    reply = receive_message(conn, request_id)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\network_layer.py", line 751, in receive_message
+    length, _, response_to, op_code = _UNPACK_HEADER(receive_data(conn, 16, deadline))
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\network_layer.py", line 371, in receive_data
+    raise OSError("connection closed")
+OSError: connection closed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2227, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\topology.py", line 688, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 976, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 1070, in connect
+    conn.authenticate()
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 523, in authenticate
+    auth.authenticate(creds, self, reauthenticate=reauthenticate)
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\auth.py", line 450, in authenticate
+    auth_func(credentials, conn)
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\auth.py", line 355, in _authenticate_default
+    return _authenticate_scram(credentials, conn, "SCRAM-SHA-1")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\auth.py", line 96, in _authenticate_scram
+    res = conn.command(source, cmd)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\helpers.py", line 47, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 439, in command
+    self._raise_connection_failure(error)
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 641, in _raise_connection_failure
+    _raise_connection_failure(self.address, error, timeout_details=details)
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\pool_shared.py", line 149, in _raise_connection_failure
+    raise AutoReconnect(msg) from error
+pymongo.errors.AutoReconnect: ac-bru7v8w-shard-00-01.10h2w59.mongodb.net:27017: connection closed (configured timeouts: socketTimeoutMS: 10000.0ms, connectTimeoutMS: 3000.0ms)
+2025-05-08 10:51:19,161 - pymongo.client - ERROR - MongoClient background task encountered an error:
+Traceback (most recent call last):
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\pool_shared.py", line 512, in _configured_socket_interface
+    ssl_sock = ssl_context.wrap_socket(sock, server_hostname=host)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\ssl.py", line 1042, in _create
+    self.do_handshake()
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\ssl.py", line 1320, in do_handshake
+    self._sslobj.do_handshake()
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\mongo_client.py", line 2227, in _process_periodic_tasks
+    self._topology.update_pool()
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\topology.py", line 688, in update_pool
+    server.pool.remove_stale_sockets(generation)
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 976, in remove_stale_sockets
+    conn = self.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\synchronous\pool.py", line 1030, in connect
+    networking_interface = _configured_socket_interface(self.address, self.opts)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\pool_shared.py", line 526, in _configured_socket_interface
+    _raise_connection_failure(address, exc, "SSL handshake failed: ", timeout_details=details)
+  File "C:\Users\Tien\AppData\Local\Programs\Python\Python312\Lib\site-packages\pymongo\pool_shared.py", line 149, in _raise_connection_failure
+    raise AutoReconnect(msg) from error
+pymongo.errors.AutoReconnect: SSL handshake failed: ac-bru7v8w-shard-00-00.10h2w59.mongodb.net:27017: [WinError 10054] An existing connection was forcibly closed by the remote host (configured timeouts: socketTimeoutMS: 10000.0ms, connectTimeoutMS: 3000.0ms)
+2025-05-08 11:03:26,285 - werkzeug - INFO -  * Detected change in 'D:\\LAPTRINHWEB\\baitaplonLTW\\phim-NEU-main\\routes\\api_routes.py', reloading
+2025-05-08 11:03:26,818 - werkzeug - INFO -  * Restarting with stat
+2025-05-08 11:03:31,446 - root - INFO - [THÀNH CÔNG] Kết nối MongoDB Atlas thành công!
+2025-05-08 11:03:31,560 - root - INFO - Không tìm thấy người dùng nào không có ID
+2025-05-08 11:03:32,467 - root - INFO - Index MongoDB được tạo thành công
